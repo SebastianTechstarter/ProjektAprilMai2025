@@ -1,9 +1,14 @@
 # ProjektAprilMai2025
-
+Gruppenmitglieder:
 -  Sebastian
 -  Marcel
 -  Dennis
 -  Weisong
+
+## Plan für 02.Mai
+- Basis-Struktur des Frontend  und Backend aufziehen (gemeinsam)
+- Product Backlog füllen
+- Sprint Planning für Woche 1
 
 Unsere Idee: 
 ## BookBay, eine Handelsplattform für Bücher. 
