@@ -73,13 +73,13 @@
                 const textureLoader = new THREE.TextureLoader();
 
                 //Texture hinten
-                const coverTexture = textureLoader.load('https://images.pexels.com/photos/1670977/pexels-photo-1670977.jpeg');
-                coverTexture.rotation = 1.6;
+                const coverTexture = textureLoader.load('./images/book_1/back.png');
+                coverTexture.rotation = 1.57;
                 coverTexture.center.set(0.5, 0.5);
 
                 //Texture vorne
-                const backTexture = textureLoader.load('https://images.pexels.com/photos/1670977/pexels-photo-1670977.jpeg');
-                backTexture.rotation = -1.6;
+                const backTexture = textureLoader.load('./images/book_1/front.png');
+                backTexture.rotation = -1.57;
                 backTexture.center.set(0.5, 0.5);
 
                 //Texture seite
