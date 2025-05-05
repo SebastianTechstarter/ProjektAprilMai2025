@@ -187,6 +187,16 @@
                 const rotationSpeed = 0.005;
                 book.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), deltaX * rotationSpeed);
             });
+    
+            // Zoom mit dem Mausrad
+            container.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                const zoomSpeed = 0.1;
+                camera.position.z += event.deltaY * zoomSpeed * 0.01;
+    
+                // Begrenzung des Zooms
+                camera.position.z = Math.max(1.5, Math.min(6, camera.position.z));
+            });
         }
     
         function animate() {
@@ -200,7 +210,7 @@
             renderer.render(scene, camera);
         }
     </script>
-
+    
 
 </body>
 
