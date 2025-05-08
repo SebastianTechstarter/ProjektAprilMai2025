@@ -33,7 +33,7 @@ const authenticate = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
+        req.user = decoded; // decoded 中已经包含 userType
         next();
     } catch (err) {
         return res.status(401).json({ message: 'Invalid token' });
@@ -76,7 +76,7 @@ app.post('/api/v1/auth/register', [
 app.post('/api/v1/auth/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const [users] = await pool.query('SELECT user_id, email, password_hash FROM user WHERE email = ?', [email]);
+        const [users] = await pool.query('SELECT user_id, email, password_hash, user_type FROM user WHERE email = ?', [email]);
         if (users.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -89,12 +89,12 @@ app.post('/api/v1/auth/login', async (req, res) => {
 
         // JWT generieren
         const token = jwt.sign(
-            { userId: user.user_id },
+            { userId: user.user_id, userType: user.user_type },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        res.json({ token, user });
+        res.json({ token, user: { userId: user.user_id, userType: user.user_type } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -104,7 +104,7 @@ app.post('/api/v1/auth/login', async (req, res) => {
 // Verfügbare Bücher abrufen
 app.get('/api/books', async (req, res) => {
     try {
-        const [books] = await pool.query('SELECT * FROM book WHERE status = "available"');
+        const [books] = await pool.query('SELECT * FROM book');
         res.json(books);
     } catch (err) {
         console.error('Fehler beim Abrufen der Bücher:', err);
@@ -128,6 +128,9 @@ app.get('/api/book/sample', async (req, res) => {
 
 // Warenkorbmodul
 app.get('/api/v1/cart', authenticate, async (req, res) => {
+    if (!req.user || !req.user.userType) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
     try {
         const [cartItems] = await pool.query(`
             SELECT c.*, b.title, b.price
@@ -176,6 +179,9 @@ app.get('/api/v1/shop', async (req, res) => {
 
 // Bestellmodul
 app.post('/api/v1/orders', authenticate, async (req, res) => {
+    if (!req.user || !req.user.userType) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -208,21 +214,148 @@ app.post('/api/v1/orders', authenticate, async (req, res) => {
 
 // Verwaltungsfunktion: Buchpreise aktualisieren
 app.post('/api/v1/admin/pricing', authenticate, async (req, res) => {
+    if (!req.user || !req.user.userType) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
     // Administratorrechte prüfen
     if (req.user.userType !== 'admin') {
         return res.status(403).json({ message: 'Verboten' });
     }
 
-    const { category, adjustment } = req.body;
+    const { title, adjustment } = req.body;
     try {
         await pool.query(
-            'UPDATE book SET price = price * ? WHERE category = ?',
-            [adjustment, category]
+            'UPDATE book SET price = price * ? WHERE title = ?',
+            [adjustment, title]
         );
         res.json({ message: 'Preise erfolgreich aktualisiert' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Serverfehler' });
+    }
+});
+
+// Aktualisierung von Buchinformationen (mit Berechtigungsprüfung)
+app.put('/api/v1/books/:id', authenticate, async (req, res) => {
+    if (!req.user || !req.user.userType) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+    // Überprüfung der Administratorrechte
+    if (req.user.userType !== 'admin') {
+        return res.status(403).json({ message: 'Verboten: Keine Admin-Rechte' });
+    }
+
+    const bookId = req.params.id;
+    const updateFields = req.body;
+
+    try {
+        // Dynamisches Erstellen von SQL-Update-Anweisungen (um SQL-Injection zu verhindern)
+        const setClauses = [];
+        const values = [];
+
+        // Durchlaufen des Anfragekörpers, Filtern von Nullwerten und Erstellen von Update-Feldern
+        Object.entries(updateFields).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && key !== 'id') {
+                setClauses.push(`${key} = ?`);
+                values.push(value);
+            }
+        });
+
+        // Hinzufügen der Buch-ID am Ende der Parameter
+        values.push(bookId);
+
+        if (setClauses.length === 0) {
+            return res.status(400).json({ message: 'Keine gültigen Felder zum Aktualisieren' });
+        }
+
+        // Ausführen der Update-Abfrage
+        const sql = `UPDATE book SET ${setClauses.join(', ')} WHERE book_id = ?`;
+        const [result] = await pool.query(sql, values);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Buch nicht gefunden' });
+        }
+
+        res.json({ message: 'Buchinformationen erfolgreich aktualisiert' });
+    } catch (err) {
+        console.error('Update-Fehler:', err);
+        res.status(500).json({ message: 'Serverfehler beim Aktualisieren' });
+    }
+});
+
+// Buchinformationen aktualisieren oder anpassen (mit Berechtigungsprüfung)
+app.patch('/api/v1/books/:id', authenticate, async (req, res) => {
+    if (!req.user || !req.user.userType) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+    // Überprüfung der Administratorrechte
+    if (req.user.userType !== 'admin') {
+        return res.status(403).json({ message: 'Verboten: Keine Admin-Rechte' });
+    }
+
+    const bookId = req.params.id;
+    const updateFields = req.body;
+
+    try {
+        // Dynamisches Erstellen von SQL-Update-Anweisungen (um SQL-Injection zu verhindern)
+        const setClauses = [];
+        const values = [];
+
+        // Durchlaufen des Anfragekörpers, Filtern von Nullwerten und Erstellen von Update-Feldern
+        Object.entries(updateFields).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && key !== 'id') {
+                setClauses.push(`${key} = ?`);
+                values.push(value);
+            }
+        });
+
+        // Hinzufügen der Buch-ID am Ende der Parameter
+        values.push(bookId);
+
+        if (setClauses.length === 0) {
+            return res.status(400).json({ message: 'Keine gültigen Felder zum Aktualisieren' });
+        }
+
+        // Ausführen der Update-Abfrage
+        const sql = `UPDATE book SET ${setClauses.join(', ')} WHERE book_id = ?`;
+        const [result] = await pool.query(sql, values);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Buch nicht gefunden' });
+        }
+
+        res.json({ message: 'Buchinformationen erfolgreich aktualisiert' });
+    } catch (err) {
+        console.error('Update-Fehler:', err);
+        res.status(500).json({ message: 'Serverfehler beim Aktualisieren' });
+    }
+});
+
+// Buch löschen (mit Berechtigungsprüfung)
+app.delete('/api/v1/books/:id', authenticate, async (req, res) => {
+    if (!req.user || !req.user.userType) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+    // Überprüfung der Administratorrechte
+    if (req.user.userType !== 'admin') {
+        return res.status(403).json({ message: 'Verboten: Keine Admin-Rechte' });
+    }
+
+    const bookId = req.params.id;
+
+    try {
+        // Ausführung der Löschabfrage
+        const sql = 'DELETE FROM book WHERE book_id = ?';
+        const [result] = await pool.query(sql, [bookId]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Buch nicht gefunden' });
+        }
+
+        res.status(204).send(); // Keine Inhalte zurückgeben (erfolgreich gelöscht)
+    } catch (err) {
+        console.error('Fehler beim Löschen:', err);
+        res.status(500).json({ message: 'Serverfehler beim Löschen' });
     }
 });
 
