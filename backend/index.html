@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BookBay</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <h1>BookBay</h1>
+
+    <!-- Benutzerregistrierung -->
+    <h2>Register</h2>
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <input
+        type="text"
+        id="user_type"
+        placeholder="User Type (admin,privat, gewerblich)"
+        required
+      />
+      <input
+        type="text"
+        id="payment_method"
+        placeholder="paypal, iban, creditcard"
+        required
+      />
+      <button type="submit">Register</button>
+    </form>
+    <div id="registerResult"></div>
+
+    <!-- Benutzeranmeldung -->
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required />
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Password"
+        required
+      />
+      <button type="submit">Login</button>
+    </form>
+    <div id="loginResult"></div>
+
+    <!-- Beispielbuch abrufen -->
+    <h2>Sample Book</h2>
+    <button id="getSampleBookBtn">Get Sample Book</button>
+    <div id="sampleBookInfo"></div>
+
+    <!-- Alle Bücher abrufen -->
+    <h2>All Books</h2>
+    <button id="getAllBooksBtn">Get All Books</button>
+    <div id="allBooksInfo"></div>
+
+    <!-- Buch aktualisieren -->
+    <h2>Update Book</h2>
+    <form id="updateBookForm">
+      <input type="text" id="updateBookId" placeholder="Book ID" required />
+      <input
+        type="text"
+        id="updateField"
+        placeholder="Field to Update (e.g., title)"
+        required
+      />
+      <input type="text" id="updateValue" placeholder="New Value" required />
+      <button type="submit">Update Book</button>
+    </form>
+    <div id="updateBookResult"></div>
+
+    <!-- Buch löschen -->
+    <h2>Delete Book</h2>
+    <form id="deleteBookForm">
+      <input type="text" id="deleteBookId" placeholder="Book ID" required />
+      <button type="submit">Delete Book</button>
+    </form>
+    <div id="deleteBookResult"></div>
+
+    <!-- Admin Preisänderung -->
+    <div id="adminPricingForm" style="display: none">
+      <h2>Adjust Sample Book Price</h2>
+      <form id="pricingForm">
+        <label for="title">Title:</label>
+        <input type="text" id="title" placeholder="Book Title" required />
+        <label for="adjustment"
+          >Adjustment (e.g., 1.05 for a 5% increase):</label
+        >
+        <input
+          type="number"
+          id="adjustment"
+          step="0.01"
+          placeholder="Adjustment"
+          required
+        />
+        <button type="submit">Update Price</button>
+      </form>
+      <div id="pricingResult"></div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // 用户注册
+        $("#registerForm").submit(function (e) {
+          e.preventDefault();
+          const data = {
+            username: $("#username").val(),
+            email: $("#email").val(),
+            password: $("#password").val(),
+            user_type: $("#user_type").val(),
+            payment_method: $("#payment_method").val(),
+          };
+
+          $.ajax({
+            url: "http://localhost:3000/api/v1/auth/register",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (response) {
+              $("#registerResult").html("<p>Registration successful!</p>");
+            },
+            error: function (xhr) {
+              $("#registerResult").html(
+                "<p>Error: " + xhr.responseJSON.message + "</p>"
+              );
+            },
+          });
+        });
+
+        // 用户登录
+        $("#loginForm").submit(function (e) {
+          e.preventDefault();
+          const data = {
+            email: $("#loginEmail").val(),
+            password: $("#loginPassword").val(),
+          };
+
+          $.ajax({
+            url: "http://localhost:3000/api/v1/auth/login",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (response) {
+              $("#loginResult").html(
+                "<p>Login successful! Token: " + response.token + "</p>"
+              );
+              localStorage.setItem("authToken", response.token); // 保存 JWT
+              // 检查用户是否为管理员
+              if (response.user.userType === "admin") {
+                $("#adminPricingForm").show();
+              }
+            },
+            error: function (xhr) {
+              $("#loginResult").html(
+                "<p>Error: " + xhr.responseJSON.message + "</p>"
+              );
+            },
+          });
+        });
+
+        // 获取样本书信息
+        $("#getSampleBookBtn").click(function () {
+          $.ajax({
+            url: "http://localhost:3000/api/book/sample",
+            method: "GET",
+            success: function (data) {
+              const bookInfo = `
+                <h2>${data.title}</h2>
+                <p><strong>Author:</strong> ${data.author}</p>
+                <p><strong>ISBN:</strong> ${data.isbn}</p>
+                <p><strong>Description:</strong> ${data.description}</p>
+                <p><strong>Price:</strong> $${data.price}</p>
+                <p><strong>Quality:</strong> ${data.quality}/5</p>
+              `;
+              $("#sampleBookInfo").html(bookInfo);
+            },
+            error: function (xhr) {
+              $("#sampleBookInfo").html("<p>Error fetching sample book.</p>");
+            },
+          });
+        });
+
+        // 修改书籍信息
+        $("#updateBookForm").submit(function (e) {
+          e.preventDefault();
+          const bookId = $("#updateBookId").val();
+          const field = $("#updateField").val();
+          const value = $("#updateValue").val();
+
+          const data = {};
+          data[field] = value;
+
+          $.ajax({
+            url: `http://localhost:3000/api/v1/books/${bookId}`,
+            method: "PUT",
+            contentType: "application/json",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`, // 确保 JWT 被正确传递
+            },
+            data: JSON.stringify(data),
+            success: function (response) {
+              $("#updateBookResult").html("<p>" + response.message + "</p>");
+            },
+            error: function (xhr) {
+              $("#updateBookResult").html(
+                "<p>Error updating book: " + xhr.responseJSON.message + "</p>"
+              );
+            },
+          });
+        });
+
+        // 删除书籍
+        $("#deleteBookForm").submit(function (e) {
+          e.preventDefault();
+          const bookId = $("#deleteBookId").val();
+
+          $.ajax({
+            url: `http://localhost:3000/api/v1/books/${bookId}`,
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`, // 确保 JWT 被正确传递
+            },
+            success: function () {
+              $("#deleteBookResult").html("<p>Book deleted successfully!</p>");
+            },
+            error: function (xhr) {
+              $("#deleteBookResult").html(
+                "<p>Error deleting book: " + xhr.responseJSON.message + "</p>"
+              );
+            },
+          });
+        });
+
+        // 更新书本价格和标题
+        const bookId = "12345"; // 示例书籍 ID
+        $.ajax({
+          url: `http://localhost:3000/api/v1/books/${bookId}`,
+          method: "PATCH",
+          contentType: "application/json",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          data: JSON.stringify({ price: 19.99, title: "New Title" }),
+          success: function (response) {
+            console.log(response.message);
+          },
+          error: function (xhr) {
+            console.error(xhr.responseJSON.message);
+          },
+        });
+      });
+
+      // 获取所有书籍
+      $("#getAllBooksBtn").click(function () {
+        $.ajax({
+          url: "http://localhost:3000/api/books",
+          method: "GET",
+          success: function (data) {
+            const booksInfo = data
+              .map(
+                (book) => `
+                <h3>${book.title}</h3>
+                <p><strong>Author:</strong> ${book.author}</p>
+                <p><strong>ISBN:</strong> ${book.isbn}</p>
+                <p><strong>Description:</strong> ${book.description}</p>
+                <p><strong>Price:</strong> $${book.price}</p>
+                <p><strong>Quality:</strong> ${book.quality}/5</p>
+              `
+              )
+              .join("");
+            $("#allBooksInfo").html(booksInfo);
+          },
+          error: function (xhr) {
+            $("#allBooksInfo").html("<p>Error fetching all books.</p>");
+          },
+        });
+        // 更新书本价格
+        $("#pricingForm").submit(function (e) {
+          e.preventDefault();
+          const title = $("#title").val(); // 将 category 改为 title
+          const adjustment = parseFloat($("#adjustment").val());
+
+          $.ajax({
+            url: "http://localhost:3000/api/v1/admin/pricing",
+            method: "POST",
+            contentType: "application/json",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`, // 确保 JWT 被正确传递
+            },
+            data: JSON.stringify({ title, adjustment }),
+            success: function (response) {
+              $("#pricingResult").html("<p>" + response.message + "</p>");
+            },
+            error: function (xhr) {
+              $("#pricingResult").html(
+                "<p>Error updating price: " + xhr.responseJSON.message + "</p>"
+              );
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
