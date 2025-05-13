@@ -6,9 +6,9 @@ This document provides an overview of the API endpoints defined in the `servers.
 
 ### Base URL
 
-    ```
+    ~~~
     http://localhost:3000
-    ```
+    ~~~
 
 ---
 
@@ -20,15 +20,13 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Method**: `POST`
 - **Request Body**:
 
-  ```json
-  {
-    "username": "string",
-    "email": "string",
-    "password": "string",
-    "user_type": "admin | privat | gewerblich",
-    "payment_method": "paypal | iban | creditcard"
-  }
-  ```
+{
+"username": "string",
+"email": "string",
+"password": "string",
+"user_type": "admin | privat | gewerblich",
+"payment_method": "paypal | iban | creditcard"
+}
 
 - **Response**:
   - Success: `201 Created`
@@ -42,25 +40,23 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Method**: `POST`
 - **Request Body**:
 
-  ```json
   {
-    "email": "string",
-    "password": "string"
+  "email": "string",
+  "password": "string"
   }
-  ```
 
 - **Response**:
-  ```json
-  {
-    "token": "string",
-    "user": {
-      "userId": "number",
-      "userType": "admin | privat | gewerblich"
-    }
-  }
-  ```
-  - Success: `200 OK`
-  - Failure: `404 Not Found` or `400 Bad Request`
+
+{
+"token": "string",
+"user": {
+"userId": "number",
+"userType": "admin | privat | gewerblich"
+}
+}
+
+    - Success: `200 OK`
+    - Failure: `404 Not Found` or `400 Bad Request`
 
 ---
 
@@ -71,17 +67,17 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Endpoint**: `/api/books`
 - **Method**: `GET`
 - **Response**:
-  ```json
+
   [
-    {
-      "book_id": "number",
-      "title": "string",
-      "author": "string",
-      "price": "number",
-      ...
-    }
+  {
+  "book_id": "number",
+  "title": "string",
+  "author": "string",
+  "price": "number",
+  ...
+  }
   ]
-  ```
+
   - Success: `200 OK`
   - Failure: `500 Internal Server Error`
 
@@ -92,15 +88,15 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Endpoint**: `/api/book/sample`
 - **Method**: `GET`
 - **Response**:
-  ```json
+
   {
-    "book_id": "number",
-    "title": "string",
-    "author": "string",
-    "price": "number",
-    ...
+  "book_id": "number",
+  "title": "string",
+  "author": "string",
+  "price": "number",
+  ...
   }
-  ```
+
   - Success: `200 OK`
   - Failure: `404 Not Found` or `500 Internal Server Error`
 
@@ -118,17 +114,17 @@ This document provides an overview of the API endpoints defined in the `servers.
   - `price_max`: Maximum price
   - `sort`: Sort field (e.g., `-price` for descending order)
 - **Response**:
-  ```json
+
   [
-    {
-      "book_id": "number",
-      "title": "string",
-      "author": "string",
-      "price": "number",
-      ...
-    }
+  {
+  "book_id": "number",
+  "title": "string",
+  "author": "string",
+  "price": "number",
+  ...
+  }
   ]
-  ```
+
   - Success: `200 OK`
   - Failure: `500 Internal Server Error`
 
@@ -142,17 +138,17 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Method**: `GET`
 - **Authentication**: User only
 - **Response**:
-  ```json
+
   [
-    {
-      "cart_id": "number",
-      "book_id": "number",
-      "title": "string",
-      "price": "number",
-      ...
-    }
+  {
+  "cart_id": "number",
+  "book_id": "number",
+  "title": "string",
+  "price": "number",
+  ...
+  }
   ]
-  ```
+
   - Success: `200 OK`
   - Failure: `401 Unauthorized` or `500 Internal Server Error`
 
@@ -166,26 +162,26 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Method**: `POST`
 - **Authentication**: User only
 - **Request Body**:
-  ```json
-  {
-    "shipping_address_id": "number",
-    "payment_method": "string",
-    "items": [
-      {
-        "book_id": "number",
-        "quantity": "number"
-      }
-    ]
-  }
-  ```
+
+{
+"shipping_address_id": "number",
+"payment_method": "string",
+"items": [
+{
+"book_id": "number",
+"quantity": "number"
+}
+]
+}
+
 - **Response**:
-  ```json
-  {
-    "orderId": "number"
-  }
-  ```
-  - Success: `201 Created`
-  - Failure: `401 Unauthorized` or `500 Internal Server Error`
+
+{
+"orderId": "number"
+}
+
+- Success: `201 Created`
+- Failure: `401 Unauthorized` or `500 Internal Server Error`
 
 ---
 
@@ -199,12 +195,12 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Method**: `PUT`
 - **Authentication**: Admin only
 - **Request Body**:
-  ```json
-  {
-    "field1": "value1",
-    "field2": "value2"
-  }
-  ```
+
+{
+"field1": "value1",
+"field2": "value2"
+}
+
 - **Response**:
   - Success: `200 OK`
   - Failure: `400 Bad Request`, `404 Not Found`, or `500 Internal Server Error`
@@ -217,12 +213,12 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Method**: `PATCH`
 - **Authentication**: Admin only
 - **Request Body**:
-  ```json
-  {
-    "field1": "value1",
-    "field2": "value2"
-  }
-  ```
+
+{
+"field1": "value1",
+"field2": "value2"
+}
+
 - **Response**:
   - Success: `200 OK`
   - Failure: `400 Bad Request`, `404 Not Found`, or `500 Internal Server Error`
@@ -244,12 +240,12 @@ This document provides an overview of the API endpoints defined in the `servers.
 - **Method**: `POST`
 - **Authentication**: Admin only
 - **Request Body**:
-  ```json
-  {
-    "title": "string",
-    "adjustment": "number"
-  }
-  ```
+
+{
+"title": "string",
+"adjustment": "number"
+}
+
 - **Response**:
   - Success: `200 OK`
   - Failure: `403 Forbidden` or `500 Internal Server Error`
