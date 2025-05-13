@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/navigation-style.css">
+    <link rel="stylesheet" href="./css/font-awesome.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script src="./js/core.js"></script>
+</head>
+
+<body display-mode="dark">
+
+    <!--ELEMENT navigation-->
+    <div navigation>
+        <div logo>
+            <span>B</span>ook<span>B</span>AY
+        </div>
+        <div center-menu>
+            <input type="text" name="search" placeholder="Buchtitle, Author">
+        </div>
+        <div right-menu>
+            <div button switch-display-mode>
+                <!--<i class="fa fa-sun-o" aria-hidden="true"></i>-->
+                <i class="fa fa-moon-o" aria-hidden="true"></i>
+            </div>
+            <div button user>
+                <i class="fa fa-user" aria-hidden="true"></i>
+                <div drop-down>
+                    <div button login>Anmelden</div>
+                    <div button login>Registrieren</div>
+                </div>
+            </div>
+            <div button shopping-cart>
+                <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                <div shopping-cart-article>0</div>
+            </div>
+        </div>
+    </div>
+
+    <!--ELEMENT main Site-->
+    <style>
+        /* Container mit fester Größe */
+        #scene-container {
+            width: 1024px;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+    
+    <!--3D Element-->
+    <div id="scene-container"></div>
+    
+    <script>
+        let scene, camera, renderer, book;
+        let isHovered = false;
+        let isDragging = false;
+        let previousMouseX = 0;
+    
+        init();
+        animate();
+    
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+    
+            camera = new THREE.PerspectiveCamera(
+                75,
+                1024 / 500,
+                0.1,
+                1000
+            );
+            camera.position.set(0, 0, 2.55);
+            camera.lookAt(0, 0, 0);
+    
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(1024, 500);
+            renderer.shadowMap.enabled = false;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+            const container = document.getElementById('scene-container');
+            container.appendChild(renderer.domElement);
+    
+            // Licht
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 10, 10);
+            light.castShadow = true;
+            light.shadow.mapSize.width = 2048;
+            light.shadow.mapSize.height = 2048;
+            light.shadow.camera.left = -3;
+            light.shadow.camera.right = 3;
+            light.shadow.camera.top = 3;
+            light.shadow.camera.bottom = -3;
+            light.shadow.camera.near = 1;
+            light.shadow.camera.far = 20;
+            scene.add(light);
+    
+            // Boden für Schatten
+            const floorGeometry = new THREE.PlaneGeometry(10, 10);
+            const floorMaterial = new THREE.ShadowMaterial({ opacity: 0.2 });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -1;
+            floor.receiveShadow = true;
+            scene.add(floor);
+    
+            const textureLoader = new THREE.TextureLoader();
+            const coverTexture = textureLoader.load('./images/book_1/back.png');
+            coverTexture.rotation = 1.57;
+            coverTexture.center.set(0.5, 0.5);
+    
+            const backTexture = textureLoader.load('./images/book_1/front.png');
+            backTexture.rotation = -1.57;
+            backTexture.center.set(0.5, 0.5);
+    
+            const siteTexture = textureLoader.load('./images/book_1/site.png');
+            siteTexture.center.set(0.5, 0.5);
+    
+            const coverGeometry = new THREE.BoxGeometry(0.01, 2, 3);
+            const pagesGeometry = new THREE.BoxGeometry(0.3, 1.98, 3);
+            const backGeometry = new THREE.BoxGeometry(0.3, 0.01, 3);
+    
+            const coverMaterial = new THREE.MeshPhongMaterial({ map: coverTexture });
+            const backMaterial = new THREE.MeshPhongMaterial({ map: backTexture });
+            const siteMaterial = new THREE.MeshPhongMaterial({ map: siteTexture });
+            const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    
+            const leftCover = new THREE.Mesh(coverGeometry, coverMaterial);
+            const rightCover = new THREE.Mesh(coverGeometry, backMaterial);
+            const backCover = new THREE.Mesh(backGeometry, siteMaterial);
+            const pages = new THREE.Mesh(pagesGeometry, pageMaterial);
+    
+            leftCover.position.x = -0.15;
+            rightCover.position.x = 0.15;
+            backCover.position.set(0, 0.996, 0);
+            pages.position.x = 0;
+    
+            // Schatten aktivieren
+            [leftCover, rightCover, backCover, pages].forEach(mesh => {
+                mesh.castShadow = true;
+                mesh.receiveShadow = false;
+            });
+    
+            book = new THREE.Group();
+            book.add(leftCover);
+            book.add(rightCover);
+            book.add(backCover);
+            book.add(pages);
+            book.rotation.x = Math.PI / 2;
+    
+            scene.add(book);
+    
+            // Resize, falls Fenster anders als geplant
+            window.addEventListener('resize', () => {
+                const width = 400;
+                const height = 400;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            });
+    
+            // Hover + Drag Events
+            container.addEventListener('mouseenter', () => isHovered = true);
+            container.addEventListener('mouseleave', () => {
+                isHovered = false;
+                isDragging = false;
+            });
+    
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMouseX = e.clientX;
+            });
+    
+            container.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+    
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousMouseX;
+                previousMouseX = e.clientX;
+    
+                const rotationSpeed = 0.005;
+                book.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), deltaX * rotationSpeed);
+            });
+    
+            // Zoom mit dem Mausrad
+            container.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                const zoomSpeed = 0.1;
+                camera.position.z += event.deltaY * zoomSpeed * 0.01;
+    
+                // Begrenzung des Zooms
+                camera.position.z = Math.max(1.5, Math.min(6, camera.position.z));
+            });
+        }
+    
+        function animate() {
+            requestAnimationFrame(animate);
+    
+            if (!isHovered && !isDragging) {
+                const axis = new THREE.Vector3(0, 1, 0);
+                book.rotateOnWorldAxis(axis, -0.005);
+            }
+    
+            renderer.render(scene, camera);
+        }
+    </script>
+
+
+</body>
+
+</html>
