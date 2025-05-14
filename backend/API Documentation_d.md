@@ -91,27 +91,6 @@ Diese Dokumentation bietet einen Überblick über die in der Datei `servers.js` 
 
 ---
 
-### 4. Beispielbuch abrufen
-
-- **Endpunkt**: `/api/book/sample`
-- **Methode**: `GET`
-- **Antwort**:
-
-```json
-{
-  "book_id": "number",
-  "title": "string",
-  "author": "string",
-  "price": "number",
-  ...
-}
-```
-
-- Erfolg: `200 OK`
-- Fehler: `404 Not Found` oder `500 Internal Server Error`
-
----
-
 ## Shop
 
 ### 5. Bücher im Shop filtern
