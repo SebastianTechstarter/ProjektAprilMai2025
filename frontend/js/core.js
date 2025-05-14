@@ -47,6 +47,13 @@ $( document ).ready(() => {
             case 'hide:shopping-cart':
                 hideShoppingCart();
                 break;
+            case 'show:register':
+                hideLogin();
+                showRegister();
+                break;
+            case 'hide:register':
+                hideRegister();
+                break;
         }
     });
 
@@ -74,6 +81,14 @@ $( document ).ready(() => {
 
     function hideShoppingCart() {
         $shoppingCart.css('display', 'none');
+    }
+
+    function showRegister() {
+        $register.css('display', 'flex');
+    }
+
+    function hideRegister() {
+        $register.css('display', 'none');
     }
 
     //------------------------------------------------------------------------

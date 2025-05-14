@@ -120,6 +120,32 @@
                 <i class="fa fa-times" aria-hidden="true"></i>
             </div>
             <div title>Warenkorb</div>
+            <div list>
+                <div element>
+                    <div text><span>Steampunk</span>Dampf mich am Zylinder!</div>
+                    <div placeholder></div>
+                    <div price>19,99€</div>
+                    <div menu>
+                        <input type="number" name="article_1" min="1" max="9999" value="1">
+                        <div button="delete:article_1">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div element>
+                    <div text><span>Psychothriller</span>Wie man mit Charme scheitert</div>
+                    <div placeholder></div>
+                    <div price><span old>19,99€</span>13,50€</div>
+                    <div menu>
+                        <input type="number" name="article_1" min="1" max="9999" value="1">
+                        <div button="delete:article_1">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div result>Preis: <span>33,49€</span></div>
+            <div button="site:shopping-cart">Kaufen</div>
         </div>
     </div>
 
@@ -133,17 +159,17 @@
             </div>
             <div container>
                 <div element>
-                    <label for="user">E-Mail</label>
-                    <input type="email" name="user" placeholder="👨‍💼 M.Mustermann@gmail.com">
+                    <label for="email">E-Mail</label>
+                    <input type="email" name="email" placeholder="👨‍💼 M.Mustermann@gmail.com">
                 </div>
                 <div element>
-                    <label for="user">Passwort</label>
+                    <label for="password">Passwort</label>
                     <input type="password" name="password" placeholder="🔑 IchBin1Biene!">
                 </div>
                 <div button="forgot-password">Passwort vergessen?</div>
             </div>
             <div button="login">LOGIN</div>
-            <div other-methods style="display: none;">
+            <div other-methods>
                 <div text>oder anmelden mit</div>
                 <div menu>
                     <div button="..." steam>
@@ -157,10 +183,50 @@
                     </div>
                 </div>
             </div>
+            <div button="show:register">Benutzer erstellen!</div>
         </div>
     </div>
 
-    <div register></div>
+    <div register> 
+        <div form>
+            <div button="hide:register">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </div>
+            <div title>
+                Registrieren
+            </div>
+            <div container left>
+                <div element>
+                    <label for="email">E-Mail</label>
+                    <input type="email" name="email" placeholder="👨‍💼 M.Mustermann@gmail.com">
+                </div>
+                <div element>
+                    <label for="password">Passwort</label>
+                    <input type="password" name="password" placeholder="🔑 IchBin1Biene!">
+                </div>
+                <div element>
+                    <label for="passwordr">Passwort wiederholen</label>
+                    <input type="password" name="passwordr" placeholder="🔑 IchBin1Biene!">
+                </div>
+            </div>
+            <div container right>
+                <div element>
+                    <label for="name">Voller Name</label>
+                    <input type="text" name="name" placeholder="Max Mustermann">
+                </div>
+                <div element>
+                    <label for="postcode-city">Postleitzahl und Stadt</label>
+                    <input type="text" name="postcode-city" placeholder="12345, Potzplitz">
+                </div>
+                <div element>
+                    <label for="street-number">Straße und Hausnummer</label>
+                    <input type="text" name="street-number" placeholder="Techstarter, 66a">
+                </div>
+            </div>
+            <div button="register:company">FRIMA REGISTRIEREN</div>
+            <div button="register:private">PRIVAT REGISTRIEREN</div>
+        </div>
+    </div>
 
 </body>
 </html>
