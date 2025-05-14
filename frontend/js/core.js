@@ -99,6 +99,45 @@ $( document ).ready(() => {
         $(this).css('background-image', 'url(../images/book_' + bookCover + '/front.png)');
     });
 
+    //------------------------------------------------------------------------
+
+    function parsePrice(text) {
+        return parseFloat(text.replace(',', '.').replace('€', '').trim());
+    }
+
+    function updateCart() {
+        let totalPrice = 0;
+        let totalCount = 0;
+
+        $('[list] [element]').each(function () {
+            let quantity = parseInt($(this).find('input[type="number"]').val(), 10);
+            let priceText = $(this).find('[price]').text();
+            let price = 0;
+            if ($(this).find('[price] span[old]').length > 0) {
+                let priceParts = priceText.split($(this).find('[price] span[old]').text());
+                price = parsePrice(priceParts[1]);
+            } else {
+                price = parsePrice(priceText);
+            }
+
+            totalPrice += price * quantity;
+            totalCount += quantity;
+        });
+        $('[result] span').text(totalPrice.toFixed(2).replace('.', ',') + '€');
+        $('[button="show:shopping-cart"] [amount]').text(totalCount);
+    }
+
+    updateCart();
+
+    $('[list]').on('change', 'input[type="number"]', function () {
+        updateCart();
+    });
+
+    $('[list]').on('click', '[button^="delete:"]', function () {
+        $(this).closest('[element]').remove();
+        updateCart();
+    });
+
 
 
 });
