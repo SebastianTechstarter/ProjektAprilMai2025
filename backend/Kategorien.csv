@@ -1,0 +1,43 @@
+category_id,name,parent_category_id
+1,"Abenteuer & Outdoor",NULL
+2,Autobiografie,NULL
+3,Backbuch,NULL
+4,"Biografie & Memoiren",NULL
+5,Bilderbuch,NULL
+6,"Business & Karriere",NULL
+7,"Comics & Graphic Novels",NULL
+8,Dystopie,NULL
+9,Erstleser,NULL
+10,Fantasy,NULL
+11,"Gesundheit & Ernährung",NULL
+12,"Grusel & Spuk",NULL
+13,"High Fantasy",NULL
+14,Historisch,NULL
+15,"Historischer Roman",NULL
+16,Horror,NULL
+17,Jugendbuch,NULL
+18,Kinderbuch,NULL
+19,Kochbuch,NULL
+20,"Krimi & Thriller",NULL
+21,"Kunst & Kultur",NULL
+22,Liebesroman,NULL
+23,Manga,NULL
+24,"Musik & Film",NULL
+25,"New Adult",NULL
+26,Philosophie,NULL
+27,"Politik & Gesellschaft",NULL
+28,Psychologie,NULL
+29,Psychothriller,NULL
+30,Ratgeber,NULL
+31,Reise,NULL
+32,Roman,NULL
+33,Romantasy,NULL
+34,Sachbuch,NULL
+35,Science-Fiction,NULL
+36,"Spiritualität & Esoterik",NULL
+37,Steampunk,NULL
+38,"Umwelt & Nachhaltigkeit",NULL
+39,"Urban Fantasy",NULL
+40,Webtoon,NULL
+41,"Wirtschaft & Finanzen",NULL
+42,"Young Adult",NULL

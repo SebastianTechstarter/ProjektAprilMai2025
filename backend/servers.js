@@ -13,12 +13,12 @@ app.use(express.json());
 
 // Datenbankkonfiguration
  const dbConfig = {
-    host: 'localhost',
+    host: 'localhost:3306',
     user: 'root',
     password: 'sebastian88',
     database: 'bookbay',
     waitForConnections: true,
-    connectionLimit: 10
+    connectionLimit: 1000
     };
 
 const pool = mysql.createPool(dbConfig);
