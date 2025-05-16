@@ -4,7 +4,7 @@ CREATE TABLE user (
     password_hash CHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     user_type ENUM('admin','privat', 'gewerblich') NOT NULL,
-    payment_method ENUM('paypal', 'iban', 'creditcard') NOT NULL,
+    payment_method  VARCHAR(50) NULL,
     paypal_account VARCHAR(100),
     iban VARCHAR(34),
     creditcard_last4 CHAR(4),
@@ -33,9 +33,7 @@ CREATE TABLE publisher (
 CREATE TABLE category (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
-    parent_category_id INT,
-    FOREIGN KEY (parent_category_id) REFERENCES category(category_id)
-);
+    );
 
 CREATE TABLE book (
     book_id INT AUTO_INCREMENT PRIMARY KEY,

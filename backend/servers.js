@@ -12,14 +12,14 @@ app.use(cors());
 app.use(express.json());
 
 // Datenbankkonfiguration
- const dbConfig = {
+const dbConfig = {
     host: 'localhost:3306',
     user: 'root',
     password: 'sebastian88',
     database: 'bookbay',
     waitForConnections: true,
     connectionLimit: 1000
-    };
+};
 
 const pool = mysql.createPool(dbConfig);
 
@@ -756,7 +756,7 @@ app.post('/api/v1/categories', authenticate, async (req, res) => {
         return res.status(403).json({ message: 'Zugriff verweigert' });
     }
 
-    const { name, parent_category_id } = req.body;
+    const { name } = req.body;
 
     try {
         // Überprüfen auf Pflichtfelder
@@ -766,8 +766,8 @@ app.post('/api/v1/categories', authenticate, async (req, res) => {
 
         // Neue Kategorie erstellen
         const [result] = await pool.query(
-            'INSERT INTO category (name, parent_category_id) VALUES (?, ?)',
-            [name, parent_category_id]
+            'INSERT INTO category (name,) VALUES (?)',
+            [name]
         );
 
         res.status(201).json({
@@ -781,27 +781,9 @@ app.post('/api/v1/categories', authenticate, async (req, res) => {
 });
 
 // Kategorien suchen
-app.get('/api/v1/categories', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    const { name, parent_id } = req.query;
-
+app.get('/api/v1/categories', async (req, res) => {
     try {
-        let query = 'SELECT * FROM category WHERE 1=1';
-        const params = [];
-
-        if (name) {
-            query += ' AND name LIKE ?';
-            params.push(`%${name}%`);
-        }
-        if (parent_id) {
-            query += ' AND parent_category_id = ?';
-            params.push(parent_id);
-        }
-
-        const [categories] = await pool.query(query, params);
+        const [categories] = await pool.query('SELECT * FROM category');
         res.json(categories);
     } catch (err) {
         console.error('Kategorie-Suchfehler:', err);
