@@ -475,11 +475,11 @@ app.post('/api/v1/addresses', authenticate, async (req, res) => {
         return res.status(403).json({ message: 'Zugriff verweigert' });
     }
 
-    const { address_type, street, house_number, ...otherFields } = req.body;
+    const { address_type, street, house_number, post_office_box, postal_code, city, country } = req.body;
 
     try {
         await pool.query(
-            'INSERT INTO address (user_id, address_type, street, house_number, post_office_box, postal_code, city, country) VALUES (?, ?, ?, ?, ...)',
+            'INSERT INTO address (user_id, address_type, street, house_number, post_office_box, postal_code, city, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?,)',
             [req.user.userId, address_type, street, house_number, post_office_box, postal_code, city, country]
         );
 
