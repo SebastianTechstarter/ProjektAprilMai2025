@@ -10,142 +10,356 @@
     <script src="./js/core.js"></script>
 </head>
 <body background="1">
-    
-    <div main>
-        <div navigation>
-            <div logo>B<span>OOK</span>B<span>AY</span></div>
-            <input type="text" name="search" placeholder="🔍 Magic, Fantasy, Action,...">
-            <div menu>
-                <div button="switch:background">
-                    <i class="fa fa-eye" aria-hidden="true"></i>
-                </div>
-                <div placeholder></div>
-                <div button="show:login">
-                    <i class="fa fa-user-o" aria-hidden="true"></i>
-                </div>
-                <div placeholder></div>
-                <div button="show:shopping-cart">
-                    <i class="fa fa-shopping-basket" aria-hidden="true"></i>
-                    <div amount>0</div>
-                </div>
-            </div>
-        </div>
-        <div content>
 
-            <div quick-category>
-                <div button="category:Roman">Roman</div>
-                <div button="category:Krimi & Thriller">Krimi & Thriller</div>
-                <div button="category:Psychothriller">Psychothriller</div>
-                <div button="category:Fantasy">Fantasy</div>
-                <div button="category:Urban Fantasy">Urban Fantasy</div>
-                <div button="category:High Fantasy">High Fantasy</div>
-                <div button="category:Science-Fiction">Science-Fiction</div>
-                <div button="category:Dystopie">Dystopie</div>
-                <div button="category:Steampunk">Steampunk</div>
-                <div button="category:Historisch">Historisch</div>
-                <div button="category:Historischer Roman">Historischer Roman</div>
-                <div button="category:Liebesroman">Liebesroman</div>
-                <div button="category:Romantasy">Romantasy</div>
-                <div button="category:New Adult">New Adult</div>
-                <div button="category:Young Adult">Young Adult</div>
-                <div button="category:Horror">Horror</div>
-                <div button="category:Grusel & Spuk">Grusel & Spuk</div>
-                <div button="category:Biografie & Memoiren">Biografie & Memoiren</div>
-                <div button="category:Autobiografie">Autobiografie</div>
-                <div button="category:Sachbuch">Sachbuch</div>
-                <div button="category:Ratgeber">Ratgeber</div>
-                <div button="category:Gesundheit & Ernährung">Gesundheit & Ernährung</div>
-                <div button="category:Psychologie">Psychologie</div>
-                <div button="category:Spiritualität & Esoterik">Spiritualität & Esoterik</div>
-                <div button="category:Wirtschaft & Finanzen">Wirtschaft & Finanzen</div>
-                <div button="category:Business & Karriere">Business & Karriere</div>
-                <div button="category:Politik & Gesellschaft">Politik & Gesellschaft</div>
-                <div button="category:Philosophie">Philosophie</div>
-                <div button="category:Umwelt & Nachhaltigkeit">Umwelt & Nachhaltigkeit</div>
-                <div button="category:Kinderbuch">Kinderbuch</div>
-                <div button="category:Bilderbuch">Bilderbuch</div>
-                <div button="category:Erstleser">Erstleser</div>
-                <div button="category:Jugendbuch">Jugendbuch</div>
-                <div button="category:Comics & Graphic Novels">Comics & Graphic Novels</div>
-                <div button="category:Manga">Manga</div>
-                <div button="category:Webtoon">Webtoon</div>
-                <div button="category:Kochbuch">Kochbuch</div>
-                <div button="category:Backbuch">Backbuch</div>
-                <div button="category:Reise">Reise</div>
-                <div button="category:Abenteuer & Outdoor">Abenteuer & Outdoor</div>
-                <div button="category:Kunst & Kultur">Kunst & Kultur</div>
-                <div button="category:Musik & Film">Musik & Film</div>
+    <div navigation>
+        <div logo>B<span>OOK</span>B<span>AY</span></div>
+        <input type="text" name="search" placeholder="🔍 Magic, Fantasy, Action,...">
+        <div menu>
+            <div button="switch:background">
+                <i class="fa fa-eye" aria-hidden="true"></i>
             </div>
-
-            <div top-list>
-                <div title>Top bewertete Bücher</div>
-                <div list>
-                    <div article book-cover="1">
-                        <div category>Psychothriller</div>
-                        <div rate>4,6❤️</div>
-                    </div>
-                    <div article book-cover="2">
-                        <div category>Abenteuer & Outdoor</div>
-                        <div rate>4,4❤️</div>
-                    </div>
-                    <div article book-cover="3">
-                        <div category>Kochbuch</div>
-                        <div rate>4,7❤️</div>
-                    </div>
-                    <div article book-cover="4">
-                        <div category>Autobiografie</div>
-                        <div rate>4,9❤️</div>
-                    </div>
-                    <div article book-cover="5">
-                        <div category>Steampunk</div>
-                        <div rate>4,6❤️</div>
-                    </div>
-                    <div article book-cover="6">
-                        <div category>Grusel & Spuk</div>
-                        <div rate>4,1❤️</div>
-                    </div>
-                    <div article book-cover="7">
-                        <div category>Ratgeber</div>
-                        <div rate>5,0❤️</div>
-                    </div>
-                </div>
+            <div placeholder></div>
+            <div button="show:login">
+                <i class="fa fa-user-o" aria-hidden="true"></i>
             </div>
-
+            <div placeholder></div>
+            <div button="show:shopping-cart">
+                <i class="fa fa-shopping-basket" aria-hidden="true"></i>
+                <div amount>0</div>
+            </div>
         </div>
     </div>
 
-    <div shopping-cart>
-        <div form>
-            <div button="hide:shopping-cart">
-                <i class="fa fa-times" aria-hidden="true"></i>
-            </div>
-            <div title>Warenkorb</div>
+    <div content="main">
+        <div quick-category>
+            <div button="category:Roman">Roman</div>
+            <div button="category:Krimi & Thriller">Krimi & Thriller</div>
+            <div button="category:Psychothriller">Psychothriller</div>
+            <div button="category:Fantasy">Fantasy</div>
+            <div button="category:Urban Fantasy">Urban Fantasy</div>
+            <div button="category:High Fantasy">High Fantasy</div>
+            <div button="category:Science-Fiction">Science-Fiction</div>
+            <div button="category:Dystopie">Dystopie</div>
+            <div button="category:Steampunk">Steampunk</div>
+            <div button="category:Historisch">Historisch</div>
+            <div button="category:Historischer Roman">Historischer Roman</div>
+            <div button="category:Liebesroman">Liebesroman</div>
+            <div button="category:Romantasy">Romantasy</div>
+            <div button="category:New Adult">New Adult</div>
+            <div button="category:Young Adult">Young Adult</div>
+            <div button="category:Horror">Horror</div>
+            <div button="category:Grusel & Spuk">Grusel & Spuk</div>
+            <div button="category:Biografie & Memoiren">Biografie & Memoiren</div>
+            <div button="category:Autobiografie">Autobiografie</div>
+            <div button="category:Sachbuch">Sachbuch</div>
+            <div button="category:Ratgeber">Ratgeber</div>
+            <div button="category:Gesundheit & Ernährung">Gesundheit & Ernährung</div>
+            <div button="category:Psychologie">Psychologie</div>
+            <div button="category:Spiritualität & Esoterik">Spiritualität & Esoterik</div>
+            <div button="category:Wirtschaft & Finanzen">Wirtschaft & Finanzen</div>
+            <div button="category:Business & Karriere">Business & Karriere</div>
+            <div button="category:Politik & Gesellschaft">Politik & Gesellschaft</div>
+            <div button="category:Philosophie">Philosophie</div>
+            <div button="category:Umwelt & Nachhaltigkeit">Umwelt & Nachhaltigkeit</div>
+            <div button="category:Kinderbuch">Kinderbuch</div>
+            <div button="category:Bilderbuch">Bilderbuch</div>
+            <div button="category:Erstleser">Erstleser</div>
+            <div button="category:Jugendbuch">Jugendbuch</div>
+            <div button="category:Comics & Graphic Novels">Comics & Graphic Novels</div>
+            <div button="category:Manga">Manga</div>
+            <div button="category:Webtoon">Webtoon</div>
+            <div button="category:Kochbuch">Kochbuch</div>
+            <div button="category:Backbuch">Backbuch</div>
+            <div button="category:Reise">Reise</div>
+            <div button="category:Abenteuer & Outdoor">Abenteuer & Outdoor</div>
+            <div button="category:Kunst & Kultur">Kunst & Kultur</div>
+            <div button="category:Musik & Film">Musik & Film</div>
+        </div>
+
+        <div top-list>
+            <div title>Top bewertete Bücher</div>
             <div list>
-                <div element>
-                    <div text><span>Steampunk</span>Dampf mich am Zylinder!</div>
-                    <div placeholder></div>
-                    <div price>19,99€</div>
-                    <div menu>
-                        <input type="number" name="article_1" min="1" max="9999" value="1">
-                        <div button="delete:article_1">
-                            <i class="fa fa-trash-o" aria-hidden="true"></i>
-                        </div>
-                    </div>
+                <div article button="show:book-information" book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
                 </div>
-                <div element>
-                    <div text><span>Psychothriller</span>Wie man mit Charme scheitert</div>
-                    <div placeholder></div>
-                    <div price><span old>19,99€</span>13,50€</div>
-                    <div menu>
-                        <input type="number" name="article_1" min="1" max="9999" value="1">
-                        <div button="delete:article_1">
-                            <i class="fa fa-trash-o" aria-hidden="true"></i>
-                        </div>
-                    </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
+                </div>
+                                <div article book-cover="1">
+                    <div category>Psychothriller</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="2">
+                    <div category>Abenteuer & Outdoor</div>
+                    <div rate>4,4❤️</div>
+                </div>
+                <div article book-cover="3">
+                    <div category>Kochbuch</div>
+                    <div rate>4,7❤️</div>
+                </div>
+                <div article book-cover="4">
+                    <div category>Autobiografie</div>
+                    <div rate>4,9❤️</div>
+                </div>
+                <div article book-cover="5">
+                    <div category>Steampunk</div>
+                    <div rate>4,6❤️</div>
+                </div>
+                <div article book-cover="6">
+                    <div category>Grusel & Spuk</div>
+                    <div rate>4,1❤️</div>
+                </div>
+                <div article book-cover="7">
+                    <div category>Ratgeber</div>
+                    <div rate>5,0❤️</div>
                 </div>
             </div>
-            <div result>Preis: <span>33,49€</span></div>
-            <div button="site:shopping-cart">Kaufen</div>
         </div>
     </div>
 
@@ -225,6 +439,73 @@
             </div>
             <div button="register:company">FRIMA REGISTRIEREN</div>
             <div button="register:private">PRIVAT REGISTRIEREN</div>
+        </div>
+    </div>
+
+    <div shopping-cart>
+        <div form>
+            <div button="hide:shopping-cart">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </div>
+            <div title>Warenkorb</div>
+            <div list>
+                <div element>
+                    <div text><span>Steampunk</span>Dampf mich am Zylinder!</div>
+                    <div placeholder></div>
+                    <div price>19,99€</div>
+                    <div menu>
+                        <input type="number" name="article_1" min="1" max="9999" value="1">
+                        <div button="delete:article_1">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div element>
+                    <div text><span>Psychothriller</span>Wie man mit Charme scheitert</div>
+                    <div placeholder></div>
+                    <div price><span old>19,99€</span>13,50€</div>
+                    <div menu>
+                        <input type="number" name="article_1" min="1" max="9999" value="1">
+                        <div button="delete:article_1">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div result>Preis: <span>33,49€</span></div>
+            <div button="site:shopping-cart">Kaufen</div>
+        </div>
+    </div>
+
+    <div book-information>
+        <div form>
+            <div button="hide:book-information">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </div>
+            <div book-image>
+                <div book-autor></div>
+            </div>
+            <div book-info>
+                <div element>Autor/in:<span>Test Tamento</span></div>
+                <div element>Veröffentlichung:<span>15.05.2025</span></div>
+                <div element>Kategorie:<span>Psychothriller</span></div>
+                <div element>Seiten:<span>800</span></div>
+                <div element>Title:<span>Wie man mit Charme scheitert</span></div>
+                <div element>Preis:<span>19,99€<span old>13,50€</span></span></div>
+                <div menu>
+                    <div button="addto:shopping-cart">+ Warenkorb</div>
+                    <div button="addto:library">+ Bibliothek</div>
+                </div>
+            </div>
+            <div book-description>
+                Klappentext:<span>Als Profi-Killer hat Suheib „der Schlitzer“ Marzouka eine makellose Bilanz – bis er aus Versehen den falschen Mann meuchelt. Plötzlich gejagt von Polizei und Auftraggebern, bleibt ihm nur eins: untertauchen. Ausgerechnet als Hausmeister in einem Seniorenheim. Zwischen Bingonachmittagen, sabotierten Rollatoren und einer verdächtig kriminellen Oma lernt Suheib: Töten ist leicht. Putzen schwer. Und Rache hat manchmal graue Haare.</span>
+                <div menu>
+                    <div button="read:text"><i class="fa fa-play"></i></div>
+                    <div button="pause:text"><i class="fa fa-pause"></i></div>
+                    <div button="resume:text"><i class="fa fa-play-circle"></i></div>
+                    <div button="stop:text"><i class="fa fa-stop"></i></div>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -1,11 +1,12 @@
 $( document ).ready(() => {
 
-    const $body =         $( 'body' );
-    const $main =         $( '[main]' );
-    const $login =        $( '[login]' );
-    const $register =     $( '[register]' );
-    const $shoppingCart = $( '[shopping-cart]' );
-    const $container =    $( '[quick-category]' );
+    const $body =            $( 'body' );
+    const $main =            $( '[content="main"]' );
+    const $login =           $( '[login]' );
+    const $register =        $( '[register]' );
+    const $shoppingCart =    $( '[shopping-cart]' );
+    const $bookInformation = $( '[book-information]' );
+    const $container =       $( '[quick-category]' );
 
     const chunkSize = 8;
     const $buttons = $container.children('div');
@@ -29,7 +30,8 @@ $( document ).ready(() => {
 
     // Click handler
     $moreButton.on('click', showNextChunk);
-
+    
+    let currentUtterance = null;
     $( '[button]' ).on( "click", function() {
         switch ($( this ).attr('button')) {
             case 'switch:background':
@@ -53,6 +55,55 @@ $( document ).ready(() => {
                 break;
             case 'hide:register':
                 hideRegister();
+                break;
+            case 'show:book-information':
+                showBookInformation();
+                $book_id = $( this ).attr('book-cover');
+                console.log($book_id);
+                break;
+            case 'hide:book-information':
+                hideBookInformation();
+                break;
+            case 'read:text':
+                const text = $('[book-description] span').text().trim();
+                function speak(text) {
+                    if (speechSynthesis.speaking) {
+                        speechSynthesis.cancel(); // ggf. laufende Ausgabe abbrechen
+                    }
+                    currentUtterance = new SpeechSynthesisUtterance(text);
+                    currentUtterance.lang = 'de-DE';
+                    const voices = speechSynthesis.getVoices();
+                    const preferredVoice = voices.find(voice =>
+                        voice.lang === 'de-DE' && /Google|Microsoft|Anna/.test(voice.name)
+                    );
+                    if (preferredVoice) {
+                        currentUtterance.voice = preferredVoice;
+                    }
+                    speechSynthesis.speak(currentUtterance);
+                }
+
+                if (speechSynthesis.getVoices().length > 0) {
+                    speak(text);
+                } else {
+                    speechSynthesis.onvoiceschanged = () => {
+                        speak(text);
+                    };
+                }
+                break;
+            case 'pause:text':
+                if (speechSynthesis.speaking && !speechSynthesis.paused) {
+                    speechSynthesis.pause();
+                }
+                break;
+            case 'resume:text':
+                if (speechSynthesis.paused) {
+                    speechSynthesis.resume();
+                }
+                break;
+            case 'stop:text':
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
                 break;
         }
     });
@@ -91,6 +142,14 @@ $( document ).ready(() => {
         $register.css('display', 'none');
     }
 
+    function showBookInformation() {
+        $bookInformation.css('display', 'flex');
+    }
+
+    function hideBookInformation() {
+        $bookInformation.css('display', 'none');
+    }
+
     //------------------------------------------------------------------------
     //BUCH COVER
 
@@ -109,7 +168,7 @@ $( document ).ready(() => {
         let totalPrice = 0;
         let totalCount = 0;
 
-        $('[list] [element]').each(function () {
+        $('[shopping-cart] > [form] > [list] > [element]').each(function () {
             let quantity = parseInt($(this).find('input[type="number"]').val(), 10);
             let priceText = $(this).find('[price]').text();
             let price = 0;
@@ -119,7 +178,6 @@ $( document ).ready(() => {
             } else {
                 price = parsePrice(priceText);
             }
-
             totalPrice += price * quantity;
             totalCount += quantity;
         });
@@ -137,7 +195,5 @@ $( document ).ready(() => {
         $(this).closest('[element]').remove();
         updateCart();
     });
-
-
 
 });

@@ -17,12 +17,9 @@ html, body {
 
 body {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
 }
-
-/*--------------------------------------------------------*/
-/*RANDOM BACKGROUND*/
 
 body[background="1"] {
     background-color: #FFFFFF;
@@ -53,14 +50,14 @@ body[background="5"] {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 100 100'%3E%3Crect x='0' y='0' width='46' height='46' fill-opacity='0.6' fill='%23E4E4E4'/%3E%3C/svg%3E");
 }
 
-/*--------------------------------------------------------*/
-/*NAVIGATION*/
-
-[navigation] {
-    position: sticky;
-    top: 0;
+[main] {
     width: 100%;
-    min-height: 60px;
+    height: 100%;
+}
+
+[main] > [navigation] {
+    width: 100%;
+    height: 60px;
     background-color: #ffffff;
     border-bottom: 1px solid #cccccc;
 
@@ -68,11 +65,9 @@ body[background="5"] {
     justify-content: space-between;
     align-items: center;
     gap: 20px;
-
-    z-index: 100;
 }
 
-[navigation] > [logo] {
+[main] > [navigation] > [logo] {
     margin-left: 20px;
     font-weight: 700;
     font-size: 22px;
@@ -81,7 +76,7 @@ body[background="5"] {
     align-items: center;
 }
 
-[navigation] > input {
+[main] > [navigation] > input {
     padding: 6px 10px 6px 10px;
     border: 1px solid #cccccc;
     border-radius: 6px;
@@ -89,36 +84,39 @@ body[background="5"] {
     width: 100%;
 }
 
-[navigation] > input:focus {
+[main] > [navigation] > input:focus {
     outline: none;
 }
 
-[navigation] > [logo] > span {
+[main] > [navigation] > [logo] > span {
     font-size: 16px;
 }
 
-[navigation] > [menu] {
+[main] > [navigation] > [menu] {
     margin-right: 20px;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-[navigation] > [menu] > [button] {
+[main] > [navigation] > [menu] > [button] {
     position: relative;
+
     width: 40px;
     height: 40px;
     background-color: #cccccc;
     border-radius: 6px;
+
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 18px;
     color: #222222;
+
     cursor: pointer;
 }
 
-[navigation] > [menu] > [button] > [amount] {
+[main] > [navigation] > [menu] > [button] > [amount] {
     position: absolute;
     bottom: -3px;
     right: -3px;
@@ -132,30 +130,192 @@ body[background="5"] {
     padding: 0 3px;
 }
 
-[navigation] > [menu] > [placeholder] {
+[main] > [navigation] > [menu] > [placeholder] {
     width: 1px;
     height: 24px;
     background-color: #e0e0e0;
 }
 
-/*--------------------------------------------------------*/
-/*ANMELDEN*/
+[main] > [content] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 60px 20px;
+    overflow-y: auto;
+    overflow-x: none;
+}
 
-[login] {
+[main] > [content="main"] > [top-list] {
+    position: relative;
+    width: 100%;
+    min-width: 1024px;
+    max-width: 1024px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+[main] > [content="main"] > [top-list] > [list] {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+[main] > [content="main"] > [top-list] > [list] > [article] {
+    position: relative;
+    width: 240px;
+    height: 360px;
+    background-color:#c2c2c2;
+    border-radius: 6px;
+    overflow: hidden;
+    transform: scale(1);
+    cursor: pointer;
+    background-position: center center;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-image: url('../images/book_1/front.png');
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+[main] > [content="main"] > [top-list] > [list] > [article]:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 10px #222222;
+    z-index: 100;
+}
+
+[main] > [content="main"] > [top-list] > [list] > [article] > [category] {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 3px 6px;
+    background-color: #c2c2c2da;
+    font-size: 12px;
+    color: #000000;
+    border-radius: 3px;
+}
+
+[main] > [content="main"] > [top-list] > [list] > [article] > [rate] {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 3px 6px;
+    background-color: #c2c2c2da;
+    font-size: 12px;
+    color: #000000;
+    border-radius: 3px;
+}
+
+[main] > [content="main"] > [quick-category] {
+    width: 100%;
+    min-width: 1024px;
+    max-width: 1024px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+[main] > [content="main"] > [quick-category] > [button] {
+    position: relative;
+    padding: 6px 10px;
+    background-color: #d3d3d3;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+[main] > [content="main"] > [quick-category] > [button]:hover {
+    background-color: #a2c0ff;
+}
+
+
+
+[main] > [content="library"] > [list] {
+    width: 100%;
+    min-width: 1024px;
+    max-width: 1024px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #555555;
+    border-radius: 5px;
+    backdrop-filter: blur(3px);
+}
+
+[main] > [content="library"] > [list] > [element] {
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    padding: 10px 20px;
+    align-items: center;
+}
+
+[main] > [content="library"] > [list] > [element]:not(:last-child) {
+    border-bottom: 1px dashed #555555;
+}
+
+[main] > [content="library"] > [list] > [element] > [text] {
+    text-wrap: nowrap;
+    display: flex;
+    flex-direction: column;
+}
+
+[main] > [content="library"] > [list] > [element] > [text] > span {
+    font-size: 12px;
+}
+
+[main] > [content="library"] > [list] > [element] > [placeholder] {
+    width: 100%;
+}
+
+[main] > [content="library"] > [list] > [element] > [price] {
+    display: flex;
+    gap: 6px;
+}
+
+[main] > [content="library"] > [list] > [element] > [price] > [old] {
+    text-decoration:line-through;
+    font-size: 12px;
+    color: #838383;
+}
+
+[main] > [content="library"] > [list] > [element] > [menu] {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: 30px;
+}
+
+[main] > [content="library"] > [list] > [element] > [menu] > [button] {
+    font-size: 18px;
+    cursor: pointer;
+}
+
+
+
+[login],
+[register],
+[shopping-cart] {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: #2222226e;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(1px);
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 101;
 }
 
-[login] > [form] {
+[login] > [form],
+[register] > [form],
+[shopping-cart] > [form] {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -164,9 +324,25 @@ body[background="5"] {
     background-color: #ffffff;
     border-radius: 10px;
     width: 400px;
+    box-shadow: 0 0 10px #000000;
 }
 
-[login] > [form] > [button="hide:login"] {
+[register] > [form] {
+    width: 600px;
+    display: grid;
+    grid-template-areas: 
+        "titelArea titelArea"
+        "formArea1 formArea2"
+        "buttonCompanyArea buttonPrivateArea";
+}
+
+[shopping-cart] > [form] {
+    width: 700px;
+}
+
+[login] > [form] > [button="hide:login"],
+[register] > [form] > [button="hide:register"],
+[shopping-cart] > [form] > [button="hide:shopping-cart"] {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -174,7 +350,9 @@ body[background="5"] {
     cursor: pointer;
 }
 
-[login] > [form] > [title] {
+[login] > [form] > [title],
+[register] > [form] > [title],
+[shopping-cart] > [form] > [title] {
     width: 100%;
     height: 100px;
     display: flex;
@@ -184,29 +362,46 @@ body[background="5"] {
     font-weight: 700;
 }
 
-[login] > [form] > [container] {
+[register] > [form] > [title] {
+    grid-area: titelArea;
+}
+
+[login] > [form] > [container],
+[register] > [form] > [container] {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-[login] > [form] > [container] > [element] {
+[register] > [form] > [container][left] {
+    grid-area: formArea1;
+}
+
+[register] > [form] > [container][right] {
+    grid-area: formArea2;
+}
+
+[login] > [form] > [container] > [element],
+[register] > [form] > [container] > [element] {
     display: flex;
     flex-direction: column;
 }
 
-[login] > [form] > [container] > [element] > label {
+[login] > [form] > [container] > [element] > label,
+[register] > [form] > [container] > [element] > label {
     font-size: 12px;
     padding-left: 6px;
 }
 
-[login] > [form] > [container] > [element] > input {
+[login] > [form] > [container] > [element] > input,
+[register] > [form] > [container] > [element] > input {
     padding: 14px 10px 14px 14px;
     border: none;
     border-bottom: 1px solid #c2c2c2;
 }
 
-[login] > [form] > [container] > [element] > input:focus {
+[login] > [form] > [container] > [element] > input:focus,
+[register] > [form] > [container] > [element] > input:focus {
     outline: none;
 }
 
@@ -216,13 +411,23 @@ body[background="5"] {
     cursor: pointer;
 }
 
-[login] > [form] > [button="login"] {
+[login] > [form] > [button="login"],
+[register] > [form] > [button="register:company"],
+[register] > [form] > [button="register:private"] {
     text-align: center;
     padding: 16px 0px;
     background-color: #0eee3e;
     font-size: 14px;
     border-radius: 10px;
     cursor: pointer;
+}
+
+[register] > [form] > [button="register:company"] {
+    grid-area: buttonCompanyArea;
+}
+
+[register] > [form] > [button="register:private"] {
+    grid-area: buttonPrivateArea;
 }
 
 [login] > [form] > [button="show:register"] {
@@ -272,170 +477,6 @@ body[background="5"] {
 
 [login] > [form] > [other-methods] > [menu] > [button][gitlab]:hover {
     background-color: #e60eee;
-}
-
-/*--------------------------------------------------------*/
-/*REGISTRIERUNG*/
-
-[register] {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #2222226e;
-    backdrop-filter: blur(4px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 101;
-}
-
-[register] > [form] {
-    position: relative;
-    display: grid;
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px 44px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    width: 600px;
-    grid-template-areas: 
-        "titelArea titelArea"
-        "formArea1 formArea2"
-        "buttonCompanyArea buttonPrivateArea";
-}
-
-[register] > [form] > [button="hide:register"] {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-[register] > [form] > [title] {
-    width: 100%;
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    font-weight: 700;
-}
-
-[register] > [form] > [title] {
-    grid-area: titelArea;
-}
-
-[register] > [form] > [container] {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-[register] > [form] > [container][left] {
-    grid-area: formArea1;
-}
-
-[register] > [form] > [container][right] {
-    grid-area: formArea2;
-}
-
-[register] > [form] > [container] > [element] {
-    display: flex;
-    flex-direction: column;
-}
-
-[register] > [form] > [container] > [element] > label {
-    font-size: 12px;
-    padding-left: 6px;
-}
-
-[register] > [form] > [container] > [element] > input {
-    padding: 14px 10px 14px 14px;
-    border: none;
-    border-bottom: 1px solid #c2c2c2;
-}
-
-[register] > [form] > [container] > [element] > input:focus {
-    outline: none;
-}
-
-[login] > [form] > [container] > [button] {
-    align-self: flex-end;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-[register] > [form] > [button="register:company"] {
-    grid-area: buttonCompanyArea;
-    text-align: center;
-    padding: 16px 0px;
-    background-color: #0eee3e;
-    font-size: 14px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-[register] > [form] > [button="register:private"] {
-    grid-area: buttonPrivateArea;
-    text-align: center;
-    padding: 16px 0px;
-    background-color: #0eee3e;
-    font-size: 14px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-/*--------------------------------------------------------*/
-/*SHOPPING CART*/
-
-[shopping-cart] {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #2222226e;
-    backdrop-filter: blur(4px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 101;
-}
-
-[shopping-cart] > [form] {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px 44px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    width: 400px;
-}
-
-[shopping-cart] > [form] {
-    width: 700px;
-}
-
-[shopping-cart] > [form] > [button="hide:shopping-cart"] {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-[shopping-cart] > [form] > [title] {
-    width: 100%;
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    font-weight: 700;
 }
 
 [shopping-cart] > [form] > [list] {
@@ -516,257 +557,5 @@ body[background="5"] {
     background-color: #0eee3e;
     font-size: 14px;
     border-radius: 10px;
-    cursor: pointer;
-}
-
-/*--------------------------------------------------------*/
-/*HAUPTSEITE*/
-
-[content="main"] {
-    padding: 20px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 60px;
-    overflow-x: scroll;
-}
-
-[content="main"] > [quick-category] {
-    width: 100%;
-    min-width: 1024px;
-    max-width: 1024px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-[content="main"] > [quick-category] > [button] {
-    position: relative;
-    padding: 6px 10px;
-    background-color: #d3d3d3;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-[content="main"] > [quick-category] > [button]:hover {
-    background-color: #a2c0ff;
-}
-
-[content="main"] > [top-list] {
-    position: relative;
-    width: 100%;
-    min-width: 1024px;
-    max-width: 1024px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-}
-
-[content="main"] > [top-list] > [list] {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
-
-[content="main"] > [top-list] > [list] > [article] {
-    position: relative;
-    width: 240px;
-    height: 360px;
-    background-color:#c2c2c2;
-    border-radius: 6px;
-    overflow: hidden;
-    transform: scale(1);
-    cursor: pointer;
-    background-position: center center;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-image: url('../images/book_1/front.png');
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-[content="main"] > [top-list] > [list] > [article]:hover {
-    transform: scale(1.3);
-    box-shadow: 0 0 10px #222222;
-    z-index: 100;
-}
-
-[content="main"] > [top-list] > [list] > [article] > [category] {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 3px 6px;
-    background-color: #c2c2c2da;
-    font-size: 12px;
-    color: #000000;
-    border-radius: 3px;
-}
-
-[content="main"] > [top-list] > [list] > [article] > [rate] {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    padding: 3px 6px;
-    background-color: #c2c2c2da;
-    font-size: 12px;
-    color: #000000;
-    border-radius: 3px;
-}
-
-/*--------------------------------------------------------*/
-/*BUCH INFORMATION*/
-
-[book-information] {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #2222226e;
-    backdrop-filter: blur(4px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 101;
-}
-
-[book-information] > [form] {
-    position: relative;
-    display: grid;
-    gap: 20px;
-    grid-template-areas: 
-        "book-image book-info"
-        "book-description book-description";
-    gap: 20px;
-    padding: 20px 44px;
-    background-color: #ffffff;
-    border-radius: 10px;
-}
-
-[book-information] > [form] > [button="hide:book-information"] {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-[book-information] > [form] > [book-image] {
-    grid-area: book-image;
-    position: relative;
-    width: 240px;
-    height: 360px;
-    border-radius: 6px;
-    overflow: hidden;
-    background-position: center center;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-image: url('../images/book_1/front.png');
-}
-
-[book-information] > [form] > [book-image] > [book-autor] {
-    position: absolute;
-    left: -26px;
-    bottom: -26px;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background-color: #00eeff;
-    border: 5px solid #ffffff;
-    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/1024px-User_icon_2.svg.png');
-    background-position: center center;
-    background-size: 100%;
-    cursor: pointer;
-    transition: left 1s, bottom 1s, width 1s, height 1s;
-}
-
-[book-information] > [form] > [book-image] > [book-autor]:hover {
-    left: -52px;
-    bottom: -52px;
-    width: 300px;
-    height: 300px;
-}
-
-[book-information] > [form] > [book-info] {
-    grid-area: book-info;
-    width: auto;
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-[book-information] > [form] > [book-info] > [element] {
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    font-size: 12px;
-}
-
-[book-information] > [form] > [book-info] > [element] > span {
-    font-size: 16px;
-    margin-left: 10px;
-    display: flex;
-    gap: 6px;
-}
-
-[book-information] > [form] > [book-info] > [element] > span > [old] {
-    text-decoration:line-through;
-    font-size: 12px;
-    color: #838383;
-}
-
-[book-information] > [form] > [book-info] > [menu] {
-    display: flex;
-    gap: 10px;
-}
-
-[book-information] > [form] > [book-info] > [menu] > [button] {
-    padding: 6px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-[book-information] > [form] > [book-info] > [menu] > [button="addto:shopping-cart"] {
-    background-color: #477ef5;
-}
-
-[book-information] > [form] > [book-info] > [menu] > [button="addto:library"] {
-    background-color: #64f547;
-}
-
-[book-information] > [form] > [book-description] {
-    grid-area: book-description;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    font-size: 12px;
-}
-
-[book-information] > [form] > [book-description] > span {
-    font-size: 16px;
-    margin-left: 10px;
-}
-
-[book-information] > [form] > [book-description] > [menu] {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-[book-information] > [form] > [book-description] > [menu] > [button] {
-    padding: 6px 10px;
-    background-color: #a2c0ff;
-    width: 30px;
-    height: 30px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     cursor: pointer;
 }
