@@ -1,23 +1,25 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
+// const mysql = require('mysql2/promise');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+
+const mysql = require('mysql2');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // Datenbankkonfiguration
-const dbConfig = {
-    host: 'localhost',
+ const dbConfig = {
+    host: 'localhost:3306',
     user: 'root',
-    password: 'Breakout_4',
+    password: 'sebastian88',
     database: 'bookbay',
     waitForConnections: true,
-    connectionLimit: 10
-};
+    connectionLimit: 1000
+    };
 
 const pool = mysql.createPool(dbConfig);
 
