@@ -264,5 +264,5 @@ $( document ).ready(() => {
         });
     });
 
-
+fetch("http://localhost:3000/api/books").then(res => res.json().then(data => console.log(data)))
 });
