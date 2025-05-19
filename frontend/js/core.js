@@ -265,4 +265,25 @@ $( document ).ready(() => {
     });
 
 fetch("http://localhost:3000/api/books").then(res => res.json().then(data => console.log(data)))
+fetch("http://localhost:3000/api/books")
+        .then(response => {
+            if (!response.ok) throw new Error("Netzwerkfehler");
+            return response.json();
+        })
+        .then(data => {
+            const $listContainer = $('[content="main"] > [top-list] > [list]');
+            $listContainer.empty();
+            data.forEach(book => {
+                const $bookElement = $(`
+                    <div article button="show:book-information" book-cover="${book.id}">
+                        <div category>${book.title}</div>
+                        <div rate>${book.rating.toFixed(1)}:herz:</div>
+                    </div>
+                `);
+                $listContainer.append($bookElement);
+            });
+        })
+        .catch(err => {
+            console.error("Fehler beim Laden der Bücher:", err);
+        });
 });
