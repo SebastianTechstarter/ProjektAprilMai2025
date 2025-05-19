@@ -1,4 +1,5 @@
 $( document ).ready(() => {
+    checkSession();
 
     const $body =            $( 'body' );
     const $main =            $( '[content="main"]' );
@@ -150,6 +151,21 @@ $( document ).ready(() => {
         $bookInformation.css('display', 'none');
     }
 
+    function checkSession() {
+        $.ajax({
+            url: 'http://localhost/bookbay-api/register.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ action: 'check_session' }),
+            success: res => {
+                showUserUI(res.user);
+            },
+            error: () => {
+                showLoginUI();
+            }
+        });
+    }
+
     //------------------------------------------------------------------------
     //BUCH COVER
 
@@ -195,5 +211,56 @@ $( document ).ready(() => {
         $(this).closest('[element]').remove();
         updateCart();
     });
+
+    //---------------------------------------------------------
+
+    $('[button="register:private"], [button="register:company"]').on("click", function () {
+        const userType = $(this).is('[button="register:private"]') ? 'private' : 'company';
+
+        const data = {
+            action: 'register',
+            email: $('input[name="email"]').val(),
+            password: $('input[name="password"]').val(),
+            passwordr: $('input[name="passwordr"]').val(),
+            name: $('input[name="name"]').val(),
+            postcode_city: $('input[name="postcode-city"]').val(),
+            street_number: $('input[name="street-number"]').val(),
+            type: userType
+        };
+
+        $.ajax({
+            url: 'http://localhost/bookbay-api/register.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: res => {
+                alert(res.message);
+                // Zeige Login-Formular nach erfolgreicher Registrierung
+            },
+            error: xhr => alert(xhr.responseJSON?.message || 'Fehler bei Registrierung')
+        });
+    });
+
+
+    $('[button="login"]').on("click", function () {
+        const data = {
+            action: 'login',
+            email: $('div[login] input[name="email"]').val(),
+            password: $('div[login] input[name="password"]').val()
+        };
+
+        $.ajax({
+            url: 'http://localhost/bookbay-api/register.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: res => {
+                alert(res.message);
+                showUserUI(res.user); // z.B. Name anzeigen, Logout-Button zeigen
+            },
+            error: xhr => alert(xhr.responseJSON?.message || 'Login fehlgeschlagen')
+        });
+    });
+
 
 });
