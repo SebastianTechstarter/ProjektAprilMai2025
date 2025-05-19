@@ -153,15 +153,17 @@ $( document ).ready(() => {
 
     function checkSession() {
         $.ajax({
-            url: 'http://localhost/bookbay-api/register.php',
+            url: 'http://localhost/bookbay-api/checkSession.php',
             method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ action: 'check_session' }),
-            success: res => {
-                showUserUI(res.user);
+            xhrFields: {
+                withCredentials: true
             },
-            error: () => {
-                showLoginUI();
+            success: function (response) {
+                console.log("Session-Check: ", response);
+                // ggf. showLoginUI() oder redirect()
+            },
+            error: function (xhr, status, error) {
+                console.error("Session-Check-Fehler:", error);
             }
         });
     }
