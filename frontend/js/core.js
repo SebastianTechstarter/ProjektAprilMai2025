@@ -151,23 +151,6 @@ $( document ).ready(() => {
         $bookInformation.css('display', 'none');
     }
 
-    function checkSession() {
-        $.ajax({
-            url: 'http://localhost/bookbay-api/checkSession.php',
-            method: 'POST',
-            xhrFields: {
-                withCredentials: true
-            },
-            success: function (response) {
-                console.log("Session-Check: ", response);
-                // ggf. showLoginUI() oder redirect()
-            },
-            error: function (xhr, status, error) {
-                console.error("Session-Check-Fehler:", error);
-            }
-        });
-    }
-
     //------------------------------------------------------------------------
     //BUCH COVER
 
@@ -216,28 +199,29 @@ $( document ).ready(() => {
 
     //---------------------------------------------------------
 
-    $('[button="register:private"], [button="register:company"]').on("click", function () {
+    $('[button="register:private"], [button="register:company"]').on("click", () => {
         const userType = $(this).is('[button="register:private"]') ? 'private' : 'company';
 
+        if ($('input[name="password"]').val() !== $('input[name="passwordr"]').val()) {
+            return
+        }
+
         const data = {
-            action: 'register',
+            username: '---',
             email: $('input[name="email"]').val(),
             password: $('input[name="password"]').val(),
-            passwordr: $('input[name="passwordr"]').val(),
-            name: $('input[name="name"]').val(),
-            postcode_city: $('input[name="postcode-city"]').val(),
-            street_number: $('input[name="street-number"]').val(),
-            type: userType
+            user_type: userType,
+            payment_method: 0
         };
 
         $.ajax({
-            url: 'http://localhost/bookbay-api/register.php',
+            url: 'http://localhost:3000/api/v1/auth/register',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: res => {
-                alert(res.message);
-                // Zeige Login-Formular nach erfolgreicher Registrierung
+                hideRegister();
+                showLogin();
             },
             error: xhr => alert(xhr.responseJSON?.message || 'Fehler bei Registrierung')
         });
@@ -246,23 +230,95 @@ $( document ).ready(() => {
 
     $('[button="login"]').on("click", function () {
         const data = {
-            action: 'login',
             email: $('div[login] input[name="email"]').val(),
             password: $('div[login] input[name="password"]').val()
         };
 
         $.ajax({
-            url: 'http://localhost/bookbay-api/register.php',
+            url: 'http://localhost:3000/api/v1/auth/login',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: res => {
-                alert(res.message);
-                showUserUI(res.user); // z.B. Name anzeigen, Logout-Button zeigen
+                hideLogin();
             },
             error: xhr => alert(xhr.responseJSON?.message || 'Login fehlgeschlagen')
         });
     });
 
+    $.ajax({
+        url: "http://localhost:3000/api/books",
+        method: "GET",
+        success: function (data) {
+            let listContainer = $('[content="main"] > [top-list] > [list]');
+            listContainer.empty(); // vorherige Inhalte löschen
 
+            data.forEach(book => {
+                let bookElement = $(`
+                    <div article button="show:book-information" book-cover="${book.id}">
+                        <div category>${book.title}</div>
+                        <div rate>${book.rating.toFixed(1)}❤️</div>
+                    </div>
+                `);
+                listContainer.append(bookElement);
+            });
+        },
+        error: function (err) {
+            console.error("Fehler beim Laden der Bücher:", err);
+        }
+    });
+
+    $(document).on('click', '[button="show:book-information"]', function () {
+        const bookId = $(this).attr('book-cover');
+
+        $.ajax({
+            url: `http://localhost:3000/api/v1/books/${bookId}`,
+            method: "GET",
+            success: function (book) {
+                const price = parseFloat(book.price).toFixed(2);
+                const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
+
+                const bookHtml = `
+                    <div form>
+                        <div button="hide:book-information">
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </div>
+                        <div book-image>
+                            <div book-autor>${book.author}</div>
+                        </div>
+                        <div book-info>
+                            <div element>Autor/in:<span>${book.author}</span></div>
+                            <div element>Veröffentlichung:<span>${book.publication_year}</span></div>
+                            <div element>Kategorie:<span>${book.category_name || 'Unbekannt'}</span></div>
+                            <div element>Seiten:<span>${book.page_count}</span></div>
+                            <div element>Title:<span>${book.title}</span></div>
+                            <div element>Preis:<span>${price}€${oldPrice}</span></div>
+                            <div menu>
+                                <div button="addto:shopping-cart">+ Warenkorb</div>
+                                <div button="addto:library">+ Bibliothek</div>
+                            </div>
+                        </div>
+                        <div book-description>
+                            Klappentext:<span>${book.description}</span>
+                            <div menu>
+                                <div button="read:text"><i class="fa fa-play"></i></div>
+                                <div button="pause:text"><i class="fa fa-pause"></i></div>
+                                <div button="resume:text"><i class="fa fa-play-circle"></i></div>
+                                <div button="stop:text"><i class="fa fa-stop"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('[book-information]').html(bookHtml).show();
+            },
+            error: function (err) {
+                console.error("Fehler beim Abrufen der Buchdetails:", err);
+            }
+        });
+    });
+
+    $(document).on('click', '[button="hide:book-information"]', function () {
+        $('[book-information]').hide().empty();
+    });
 });
