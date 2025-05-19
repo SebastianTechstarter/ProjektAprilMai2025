@@ -277,7 +277,7 @@ fetch("http://localhost:3000/api/books")
                 const $bookElement = $(`
                     <div article button="show:book-information" book-cover="${book.id}">
                         <div category>${book.title}</div>
-                        <div rate>${book.rating.toFixed(1)}:herz:</div>
+                        <div rate>:herz:</div>
                     </div>
                 `);
                 $listContainer.append($bookElement);
