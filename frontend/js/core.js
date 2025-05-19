@@ -25,11 +25,9 @@ $( document ).ready(() => {
 
     showNextChunk();
 
-    // Create and append "..." button
     const $moreButton = $('<div button="more"><i class="fa fa-caret-down" aria-hidden="true"></i></div>');
     $container.append($moreButton);
 
-    // Click handler
     $moreButton.on('click', showNextChunk);
     
     let currentUtterance = null;
@@ -69,7 +67,7 @@ $( document ).ready(() => {
                 const text = $('[book-description] span').text().trim();
                 function speak(text) {
                     if (speechSynthesis.speaking) {
-                        speechSynthesis.cancel(); // ggf. laufende Ausgabe abbrechen
+                        speechSynthesis.cancel();
                     }
                     currentUtterance = new SpeechSynthesisUtterance(text);
                     currentUtterance.lang = 'de-DE';
@@ -346,7 +344,7 @@ $( document ).ready(() => {
                         <div element>Kategorie:<span>${categoryName}</span></div>
                         <div element>Seiten:<span>${book.page_count}</span></div>
                         <div element>Title:<span>${book.title}</span></div>
-                        <div element>Preis:<span>${price}€${oldPrice}</span></div>
+                        <div element>Preis:<span>${price}€<span old>${oldPrice}</span></span></div>
                         <div menu>
                             <div button="addto:shopping-cart">+ Warenkorb</div>
                             <div button="addto:library">+ Bibliothek</div>
