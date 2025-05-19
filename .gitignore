@@ -5,7 +5,7 @@
 /.pnp
 .pnp.js
 readme_c.md
-settings.json
+/.vscode
 *.test.*
 index_t.html
 

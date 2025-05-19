@@ -1,11 +1,9 @@
 const express = require('express');
-// const mysql = require('mysql2/promise');
+const mysql = require('mysql2/promise');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-
-const mysql = require('mysql2');
 
 const app = express();
 app.use(cors());
@@ -13,9 +11,9 @@ app.use(express.json());
 
 // Datenbankkonfiguration
 const dbConfig = {
-    host: 'localhost:3306',
+    host: 'localhost',
     user: 'root',
-    password: 'sebastian88',
+    password: 'Breakout_4',
     database: 'bookbay',
     waitForConnections: true,
     connectionLimit: 1000
@@ -1574,5 +1572,26 @@ app.delete('/api/v1/admin/notifications/:notificationId', authenticate, async (r
         res.status(500).json({ message: 'Interner Serverfehler' });
     }
 });
+
+app.get('/api/v1/books/:id', async (req, res) => {
+    const bookId = req.params.id;
+
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM book WHERE book_id = ?',
+            [bookId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Buch nicht gefunden' });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error('Get-Fehler:', err);
+        res.status(500).json({ message: 'Serverfehler beim Abrufen des Buches' });
+    }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
