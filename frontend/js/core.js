@@ -1,5 +1,5 @@
 $( document ).ready(() => {
-    checkSession();
+    const categoryCache = {};
 
     const $body =            $( 'body' );
     const $main =            $( '[content="main"]' );
@@ -199,11 +199,12 @@ $( document ).ready(() => {
 
     //---------------------------------------------------------
 
-    $('[button="register:private"], [button="register:company"]').on("click", () => {
-        const userType = $(this).is('[button="register:private"]') ? 'private' : 'company';
+    $('[button="register:private"], [button="register:company"]').on("click", function (event) {
+        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
 
         if ($('input[name="password"]').val() !== $('input[name="passwordr"]').val()) {
-            return
+            alert("Passwörter stimmen nicht überein.");
+            return;
         }
 
         const data = {
@@ -214,109 +215,162 @@ $( document ).ready(() => {
             payment_method: 0
         };
 
-        $.ajax({
-            url: 'http://localhost:3000/api/v1/auth/register',
+        fetch('http://localhost:3000/api/v1/auth/register', {
             method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: res => {
-                hideRegister();
-                showLogin();
+            headers: {
+                'Content-Type': 'application/json'
             },
-            error: xhr => alert(xhr.responseJSON?.message || 'Fehler bei Registrierung')
+            body: JSON.stringify(data)
+        })
+        .then(async res => {
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Fehler bei Registrierung');
+            }
+            return res.json();
+        })
+        .then(result => {
+            hideRegister();
+            showLogin();
+        })
+        .catch(err => {
+            alert(err.message);
         });
     });
 
-
-    $('[button="login"]').on("click", function () {
+    $('[button="login"]').on("click", async function () {
         const data = {
             email: $('div[login] input[name="email"]').val(),
             password: $('div[login] input[name="password"]').val()
         };
 
-        $.ajax({
-            url: 'http://localhost:3000/api/v1/auth/login',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: res => {
-                hideLogin();
-            },
-            error: xhr => alert(xhr.responseJSON?.message || 'Login fehlgeschlagen')
-        });
-    });
-
-    $.ajax({
-        url: "http://localhost:3000/api/books",
-        method: "GET",
-        success: function (data) {
-            let listContainer = $('[content="main"] > [top-list] > [list]');
-            listContainer.empty(); // vorherige Inhalte löschen
-
-            data.forEach(book => {
-                let bookElement = $(`
-                    <div article button="show:book-information" book-cover="${book.id}">
-                        <div category>${book.title}</div>
-                        <div rate>${book.rating.toFixed(1)}❤️</div>
-                    </div>
-                `);
-                listContainer.append(bookElement);
+        try {
+            const res = await fetch('http://localhost:3000/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
-        },
-        error: function (err) {
-            console.error("Fehler beim Laden der Bücher:", err);
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.message || 'Login fehlgeschlagen');
+            }
+
+            const result = await res.json();
+            hideLogin(); // Erfolgreich eingeloggt
+
+        } catch (err) {
+            alert(err.message);
         }
     });
 
-    $(document).on('click', '[button="show:book-information"]', function () {
+    fetch("http://localhost:3000/api/books")
+        .then(response => {
+            if (!response.ok) throw new Error("Netzwerkfehler");
+            return response.json();
+        })
+        .then(async (books) => {
+            const $listContainer = $('[content="main"] > [top-list] > [list]');
+            $listContainer.empty();
+
+            for (const book of books) {
+                let categoryName = "Unbekannt";
+
+                if (categoryCache[book.category_id]) {
+                    categoryName = categoryCache[book.category_id];
+                } else {
+                    try {
+                        const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
+                        if (catRes.ok) {
+                            const categoryData = await catRes.json();
+                            categoryName = categoryData.name;
+                            categoryCache[book.category_id] = categoryName;
+                        }
+                    } catch (err) {
+                        console.warn("Kategorie konnte nicht geladen werden:", err);
+                    }
+                }
+
+                const $bookElement = $(`
+                    <div article button="show:book-information" book-cover="${book.id}">
+                        <div category>${categoryName}</div>
+                        <div rate>4.6❤️</div>
+                    </div>
+                `);
+
+                $listContainer.append($bookElement);
+            }
+        })
+        .catch(err => {
+            console.error("Fehler beim Laden der Bücher:", err);
+        });
+
+    $(document).on('click', '[button="show:book-information"]', async function () {
         const bookId = $(this).attr('book-cover');
 
-        $.ajax({
-            url: `http://localhost:3000/api/v1/books/${bookId}`,
-            method: "GET",
-            success: function (book) {
-                const price = parseFloat(book.price).toFixed(2);
-                const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
+        try {
+            const res = await fetch(`http://localhost:3000/api/v1/books/${bookId}`);
+            if (!res.ok) throw new Error("Fehler beim Laden des Buchs");
+            const book = await res.json();
 
-                const bookHtml = `
-                    <div form>
-                        <div button="hide:book-information">
-                            <i class="fa fa-times" aria-hidden="true"></i>
-                        </div>
-                        <div book-image>
-                            <div book-autor>${book.author}</div>
-                        </div>
-                        <div book-info>
-                            <div element>Autor/in:<span>${book.author}</span></div>
-                            <div element>Veröffentlichung:<span>${book.publication_year}</span></div>
-                            <div element>Kategorie:<span>${book.category_name || 'Unbekannt'}</span></div>
-                            <div element>Seiten:<span>${book.page_count}</span></div>
-                            <div element>Title:<span>${book.title}</span></div>
-                            <div element>Preis:<span>${price}€${oldPrice}</span></div>
-                            <div menu>
-                                <div button="addto:shopping-cart">+ Warenkorb</div>
-                                <div button="addto:library">+ Bibliothek</div>
-                            </div>
-                        </div>
-                        <div book-description>
-                            Klappentext:<span>${book.description}</span>
-                            <div menu>
-                                <div button="read:text"><i class="fa fa-play"></i></div>
-                                <div button="pause:text"><i class="fa fa-pause"></i></div>
-                                <div button="resume:text"><i class="fa fa-play-circle"></i></div>
-                                <div button="stop:text"><i class="fa fa-stop"></i></div>
-                            </div>
+            let categoryName = book.category_name || "Unbekannt";
+
+            if (!book.category_name && book.category_id) {
+                try {
+                    const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
+                    if (catRes.ok) {
+                        const categoryData = await catRes.json();
+                        categoryName = categoryData.name;
+                    }
+                } catch (e) {
+                    console.warn("Kategorie konnte nicht geladen werden:", e);
+                }
+            }
+
+            const price = parseFloat(book.price).toFixed(2);
+            const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
+
+            const bookHtml = `
+                <div form>
+                    <div button="hide:book-information">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                    </div>
+                    <div book-image>
+                        <div book-autor>${book.author}</div>
+                    </div>
+                    <div book-info>
+                        <div element>Autor/in:<span>${book.author}</span></div>
+                        <div element>Veröffentlichung:<span>${book.publication_year}</span></div>
+                        <div element>Kategorie:<span>${categoryName}</span></div>
+                        <div element>Seiten:<span>${book.page_count}</span></div>
+                        <div element>Title:<span>${book.title}</span></div>
+                        <div element>Preis:<span>${price}€${oldPrice}</span></div>
+                        <div menu>
+                            <div button="addto:shopping-cart">+ Warenkorb</div>
+                            <div button="addto:library">+ Bibliothek</div>
                         </div>
                     </div>
-                `;
+                    <div book-description>
+                        Klappentext:<span>${book.description}</span>
+                        <div menu>
+                            <div button="read:text"><i class="fa fa-play"></i></div>
+                            <div button="pause:text"><i class="fa fa-pause"></i></div>
+                            <div button="resume:text"><i class="fa fa-play-circle"></i></div>
+                            <div button="stop:text"><i class="fa fa-stop"></i></div>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-                $('[book-information]').html(bookHtml).show();
-            },
-            error: function (err) {
-                console.error("Fehler beim Abrufen der Buchdetails:", err);
-            }
-        });
+            $('[book-information]').html(bookHtml).show();
+
+        } catch (err) {
+            console.error("Fehler beim Abrufen der Buchdetails:", err);
+        }
     });
+
 
     $(document).on('click', '[button="hide:book-information"]', function () {
         $('[book-information]').hide().empty();
