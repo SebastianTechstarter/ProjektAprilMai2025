@@ -1,5 +1,5 @@
 $( document ).ready(() => {
-    checkSession();
+    const categoryCache = {};
 
     const $body =            $( 'body' );
     const $main =            $( '[content="main"]' );
@@ -25,11 +25,9 @@ $( document ).ready(() => {
 
     showNextChunk();
 
-    // Create and append "..." button
     const $moreButton = $('<div button="more"><i class="fa fa-caret-down" aria-hidden="true"></i></div>');
     $container.append($moreButton);
 
-    // Click handler
     $moreButton.on('click', showNextChunk);
     
     let currentUtterance = null;
@@ -69,7 +67,7 @@ $( document ).ready(() => {
                 const text = $('[book-description] span').text().trim();
                 function speak(text) {
                     if (speechSynthesis.speaking) {
-                        speechSynthesis.cancel(); // ggf. laufende Ausgabe abbrechen
+                        speechSynthesis.cancel();
                     }
                     currentUtterance = new SpeechSynthesisUtterance(text);
                     currentUtterance.lang = 'de-DE';
@@ -151,23 +149,6 @@ $( document ).ready(() => {
         $bookInformation.css('display', 'none');
     }
 
-    function checkSession() {
-        $.ajax({
-            url: 'http://localhost/bookbay-api/checkSession.php',
-            method: 'POST',
-            xhrFields: {
-                withCredentials: true
-            },
-            success: function (response) {
-                console.log("Session-Check: ", response);
-                // ggf. showLoginUI() oder redirect()
-            },
-            error: function (xhr, status, error) {
-                console.error("Session-Check-Fehler:", error);
-            }
-        });
-    }
-
     //------------------------------------------------------------------------
     //BUCH COVER
 
@@ -216,74 +197,181 @@ $( document ).ready(() => {
 
     //---------------------------------------------------------
 
-    $('[button="register:private"], [button="register:company"]').on("click", function () {
-        const userType = $(this).is('[button="register:private"]') ? 'private' : 'company';
+    $('[button="register:private"], [button="register:company"]').on("click", function (event) {
+        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
+
+        if ($('input[name="password"]').val() !== $('input[name="passwordr"]').val()) {
+            alert("Passwörter stimmen nicht überein.");
+            return;
+        }
 
         const data = {
-            action: 'register',
+            username: '---',
             email: $('input[name="email"]').val(),
             password: $('input[name="password"]').val(),
-            passwordr: $('input[name="passwordr"]').val(),
-            name: $('input[name="name"]').val(),
-            postcode_city: $('input[name="postcode-city"]').val(),
-            street_number: $('input[name="street-number"]').val(),
-            type: userType
+            user_type: userType,
+            payment_method: 0
         };
 
-        $.ajax({
-            url: 'http://localhost/bookbay-api/register.php',
+        fetch('http://localhost:3000/api/v1/auth/register', {
             method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: res => {
-                alert(res.message);
-                // Zeige Login-Formular nach erfolgreicher Registrierung
+            headers: {
+                'Content-Type': 'application/json'
             },
-            error: xhr => alert(xhr.responseJSON?.message || 'Fehler bei Registrierung')
+            body: JSON.stringify(data)
+        })
+        .then(async res => {
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Fehler bei Registrierung');
+            }
+            return res.json();
+        })
+        .then(result => {
+            hideRegister();
+            showLogin();
+        })
+        .catch(err => {
+            alert(err.message);
         });
     });
 
-
-    $('[button="login"]').on("click", function () {
+    $('[button="login"]').on("click", async function () {
         const data = {
-            action: 'login',
             email: $('div[login] input[name="email"]').val(),
             password: $('div[login] input[name="password"]').val()
         };
 
-        $.ajax({
-            url: 'http://localhost/bookbay-api/register.php',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: res => {
-                alert(res.message);
-                showUserUI(res.user); // z.B. Name anzeigen, Logout-Button zeigen
-            },
-            error: xhr => alert(xhr.responseJSON?.message || 'Login fehlgeschlagen')
-        });
-    });
+        try {
+            const res = await fetch('http://localhost:3000/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
 
-fetch("http://localhost:3000/api/books").then(res => res.json().then(data => console.log(data)))
-fetch("http://localhost:3000/api/books")
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.message || 'Login fehlgeschlagen');
+            }
+
+            const result = await res.json();
+            hideLogin(); // Erfolgreich eingeloggt
+
+        } catch (err) {
+            alert(err.message);
+        }
+    fetch("http://localhost:3000/api/books")
+
         .then(response => {
             if (!response.ok) throw new Error("Netzwerkfehler");
             return response.json();
         })
-        .then(data => {
+
+        .then(async (books) => {
             const $listContainer = $('[content="main"] > [top-list] > [list]');
             $listContainer.empty();
-            data.forEach(book => {
+
+            for (const book of books) {
+                let categoryName = "Unbekannt";
+
+                if (categoryCache[book.category_id]) {
+                    categoryName = categoryCache[book.category_id];
+                } else {
+                    try {
+                        const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
+                        if (catRes.ok) {
+                            const categoryData = await catRes.json();
+                            categoryName = categoryData.name;
+                            categoryCache[book.category_id] = categoryName;
+                        }
+                    } catch (err) {
+                        console.warn("Kategorie konnte nicht geladen werden:", err);
+                    }
+                }
+
                 const $bookElement = $(`
                     <div article button="show:book-information" book-cover="${book.id}">
-                        <div category>${book.title}</div>
-                        <div rate>:herz:</div>
+                        <div category>${categoryName}</div>
+                        <div rate>4.6❤️</div>
                     </div>
                 `);
+
                 $listContainer.append($bookElement);
-            });
+            }
+
         })
         .catch(err => {
             console.error("Fehler beim Laden der Bücher:", err);
         });
+
+    $(document).on('click', '[button="show:book-information"]', async function () {
+        const bookId = $(this).attr('book-cover');
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/v1/books/${bookId}`);
+            if (!res.ok) throw new Error("Fehler beim Laden des Buchs");
+            const book = await res.json();
+
+            let categoryName = book.category_name || "Unbekannt";
+
+            if (!book.category_name && book.category_id) {
+                try {
+                    const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
+                    if (catRes.ok) {
+                        const categoryData = await catRes.json();
+                        categoryName = categoryData.name;
+                    }
+                } catch (e) {
+                    console.warn("Kategorie konnte nicht geladen werden:", e);
+                }
+            }
+
+            const price = parseFloat(book.price).toFixed(2);
+            const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
+
+            const bookHtml = `
+                <div form>
+                    <div button="hide:book-information">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                    </div>
+                    <div book-image>
+                        <div book-autor>${book.author}</div>
+                    </div>
+                    <div book-info>
+                        <div element>Autor/in:<span>${book.author}</span></div>
+                        <div element>Veröffentlichung:<span>${book.publication_year}</span></div>
+                        <div element>Kategorie:<span>${categoryName}</span></div>
+                        <div element>Seiten:<span>${book.page_count}</span></div>
+                        <div element>Title:<span>${book.title}</span></div>
+                        <div element>Preis:<span>${price}€<span old>${oldPrice}</span></span></div>
+                        <div menu>
+                            <div button="addto:shopping-cart">+ Warenkorb</div>
+                            <div button="addto:library">+ Bibliothek</div>
+                        </div>
+                    </div>
+                    <div book-description>
+                        Klappentext:<span>${book.description}</span>
+                        <div menu>
+                            <div button="read:text"><i class="fa fa-play"></i></div>
+                            <div button="pause:text"><i class="fa fa-pause"></i></div>
+                            <div button="resume:text"><i class="fa fa-play-circle"></i></div>
+                            <div button="stop:text"><i class="fa fa-stop"></i></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('[book-information]').html(bookHtml).show();
+
+        } catch (err) {
+            console.error("Fehler beim Abrufen der Buchdetails:", err);
+        }
+    });
+
+    $(document).on('click', '[button="hide:book-information"]', function () {
+        $('[book-information]').hide().empty();
+    });
+
 });

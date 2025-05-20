@@ -1,43 +1,43 @@
-category_id,name,parent_category_id
-1,"Abenteuer & Outdoor",NULL
-2,Autobiografie,NULL
-3,Backbuch,NULL
-4,"Biografie & Memoiren",NULL
-5,Bilderbuch,NULL
-6,"Business & Karriere",NULL
-7,"Comics & Graphic Novels",NULL
-8,Dystopie,NULL
-9,Erstleser,NULL
-10,Fantasy,NULL
-11,"Gesundheit & Ernährung",NULL
-12,"Grusel & Spuk",NULL
-13,"High Fantasy",NULL
-14,Historisch,NULL
-15,"Historischer Roman",NULL
-16,Horror,NULL
-17,Jugendbuch,NULL
-18,Kinderbuch,NULL
-19,Kochbuch,NULL
-20,"Krimi & Thriller",NULL
-21,"Kunst & Kultur",NULL
-22,Liebesroman,NULL
-23,Manga,NULL
-24,"Musik & Film",NULL
-25,"New Adult",NULL
-26,Philosophie,NULL
-27,"Politik & Gesellschaft",NULL
-28,Psychologie,NULL
-29,Psychothriller,NULL
-30,Ratgeber,NULL
-31,Reise,NULL
-32,Roman,NULL
-33,Romantasy,NULL
-34,Sachbuch,NULL
-35,Science-Fiction,NULL
-36,"Spiritualität & Esoterik",NULL
-37,Steampunk,NULL
-38,"Umwelt & Nachhaltigkeit",NULL
-39,"Urban Fantasy",NULL
-40,Webtoon,NULL
-41,"Wirtschaft & Finanzen",NULL
-42,"Young Adult",NULL
+category_id,name
+1,"Abenteuer & Outdoor"
+2,Autobiografie
+3,Backbuch
+4,"Biografie & Memoiren"
+5,Bilderbuch
+6,"Business & Karriere"
+7,"Comics & Graphic Novels"
+8,Dystopie
+9,Erstleser
+10,Fantasy
+11,"Gesundheit & Ernährung"
+12,"Grusel & Spuk"
+13,"High Fantasy"
+14,Historisch
+15,"Historischer Roman"
+16,Horror
+17,Jugendbuch
+18,Kinderbuch
+19,Kochbuch
+20,"Krimi & Thriller"
+21,"Kunst & Kultur"
+22,Liebesroman
+23,Manga
+24,"Musik & Film"
+25,"New Adult"
+26,Philosophie
+27,"Politik & Gesellschaft"
+28,Psychologie
+29,Psychothriller
+30,Ratgeber
+31,Reise
+32,Roman
+33,Romantasy
+34,Sachbuch
+35,Science-Fiction
+36,"Spiritualität & Esoterik"
+37,Steampunk
+38,"Umwelt & Nachhaltigkeit"
+39,"Urban Fantasy"
+40,Webtoon
+41,"Wirtschaft & Finanzen"
+42,"Young Adult"
