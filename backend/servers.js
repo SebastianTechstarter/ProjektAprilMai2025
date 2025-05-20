@@ -76,38 +76,6 @@ app.post('/api/v1/auth/register', [
     }
 });
 
-// Benutzerregistrierung
-// app.post('/api/v1/auth/register', [
-//     body('email').isEmail(),
-//     body('password')
-//         .isLength({ min: 6 })
-//         .withMessage('Passwort muss mindestens 6 Zeichen lang sein'),
-
-
-// ], async (req, res) => {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-//     try {
-//         const { username, email, password, user_type, payment_method } = req.body;
-
-
-//         const existingUser = await pool.findOne('SELECT user_id FROM user WHERE email = ?', [email]);
-//         if (existingUser) return res.status(409).json({ error: 'E-Mail existiert bereits' });
-
-
-//         // Passwort hashen
-//         const hashedPassword = await bcrypt.hash(password, 10);
-//         await pool.query(
-//             'INSERT INTO user (username, email, password_hash, user_type, payment_method) VALUES (?, ?, ?, ?, ?)',
-//             [username, email, hashedPassword, user_type, payment_method]
-//         );
-
-//         res.status(201).json({ message: 'User created successfully' });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-// });
 
 // Benutzeranmeldung
 app.post('/api/v1/auth/login', async (req, res) => {
