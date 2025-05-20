@@ -65,7 +65,7 @@ $( document ).ready(() => {
                 hideBookInformation();
                 break;
             case 'read:text':
-                const text = $('[book-description] span').text().trim();
+                const text = $('[book-description] > span').text().trim();
                 function speak(text) {
                     if (speechSynthesis.speaking) {
                         speechSynthesis.cancel();
@@ -149,11 +149,6 @@ $( document ).ready(() => {
     function hideBookInformation() {
         $bookInformation.css('display', 'none');
     }
-
-    //------------------------------------------------------------------------
-    //BUCH COVER
-
-    
 
     //------------------------------------------------------------------------
 
@@ -291,19 +286,7 @@ $( document ).ready(() => {
             if (!res.ok) throw new Error("Fehler beim Laden des Buchs");
             const book = await res.json();
 
-            let categoryName = book.category_name || "Unbekannt";
-
-            if (!book.category_name && book.category_id) {
-                try {
-                    const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
-                    if (catRes.ok) {
-                        const categoryData = await catRes.json();
-                        categoryName = categoryData.name;
-                    }
-                } catch (e) {
-                    console.warn("Kategorie konnte nicht geladen werden:", e);
-                }
-            }
+            let categoryName = '';
 
             const price = parseFloat(book.price).toFixed(2);
             const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
@@ -317,14 +300,14 @@ $( document ).ready(() => {
                         <div book-autor>${book.author}</div>
                     </div>
                     <div book-info>
-                        <div element>Autor/in:<span>${book.author}</span></div>
+                        <div element>Author/in:<span>${book.author}</span></div>
                         <div element>Veröffentlichung:<span>${book.publication_year}</span></div>
-                        <div element>Kategorie:<span>${categoryName}</span></div>
+                        <div element>Kategorie:<span>${categoryCache[book.category_id]}</span></div>
                         <div element>Seiten:<span>${book.page_count}</span></div>
                         <div element>Title:<span>${book.title}</span></div>
                         <div element>Preis:<span>${price}€<span old>${oldPrice}</span></span></div>
                         <div menu>
-                            <div button="addto:shopping-cart">+ Warenkorb</div>
+                            <div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryCache[book.category_id]};${price};1">+ Warenkorb</div>
                             <div button="addto:library">+ Bibliothek</div>
                         </div>
                     </div>
@@ -369,6 +352,37 @@ $( document ).ready(() => {
 
             $article.toggle(matches);
         });
+    });
+
+    $(document).on('click', '[button^="addto:shopping-cart"]', function () {
+        const bookData = $(this).attr('book-data');
+        if (!bookData) return;
+
+        const [bookId, title, category, price] = bookData.split(';');
+
+        const uniqueId = 'article_' + bookId;
+
+        // HTML für das neue Element
+        const elementHTML = `
+            <div element>
+                <div text><span>${category}</span>${title}</div>
+                <div placeholder></div>
+                <div price>${price}</div>
+                <div menu>
+                    <input type="number" name="${uniqueId}" min="1" max="9999" value="1">
+                    <div button="delete:${uniqueId}">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('div[shopping-cart] div[list]').append(elementHTML);
+    });
+
+    // Optional: Löschen eines Elements
+    $(document).on('click', '[button^="delete:"]', function () {
+        $(this).closest('div[element]').remove();
     });
 
     fetch("http://localhost:3000/api/books")
