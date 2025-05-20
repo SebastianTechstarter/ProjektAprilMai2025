@@ -360,8 +360,9 @@ $( document ).ready(() => {
             const title = ($article.attr('title') || '').toLowerCase();
             const isbn = ($article.attr('isbn') || '').toLowerCase();
             const publisher = ($article.attr('publisher') || '').toLowerCase();
+            const publication_year = ($article.attr('publication-year') || '').toLowerCase();
 
-            const matches = [author, category, title, isbn, publisher].some(field =>
+            const matches = [author, category, title, isbn, publisher, publication_year].some(field =>
                 field.includes(searchTerm)
             );
 
