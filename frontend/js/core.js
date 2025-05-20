@@ -204,31 +204,17 @@ $( document ).ready(() => {
         let password1 = $('input[name="password-register-1"]').val();
         let password2 = $('input[name="password-register-2"]').val();
 
-<<<<<<< Updated upstream
         if (password1 !== password2) {
-=======
-        let password1 = $('input[name="password-register-1"]').val();
-        console.log('passwort 1: ' + password1);
-        let password2 = $('input[name="password-register-2"]').val();
-        console.log('passwort 2: ' + password2);
-        if (password1 != password2) {
->>>>>>> Stashed changes
             alert("Passwörter stimmen nicht überein.");
             return;
         }
 
         const data = {
-<<<<<<< Updated upstream
             username: generateRandomUsername(),
             email: $('input[name="email"]').val(),
             password: password1,
             user_type: userType,
             payment_method: 'iban'
-=======
-            email: $('input[name="email"]').val(),
-            password: password1,
-          
->>>>>>> Stashed changes
         };
 
         fetch('http://localhost:3000/api/v1/auth/register', {
