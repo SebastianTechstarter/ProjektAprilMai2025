@@ -152,10 +152,7 @@ $( document ).ready(() => {
     //------------------------------------------------------------------------
     //BUCH COVER
 
-    $('[article]').each(function() {
-        let bookCover = $(this).attr('book-cover');
-        $(this).css('background-image', 'url(../images/book_' + bookCover + '/front.png)');
-    });
+    
 
     //------------------------------------------------------------------------
 
@@ -332,42 +329,47 @@ $( document ).ready(() => {
     });
 
     fetch("http://localhost:3000/api/books")
-        .then(response => {
-            if (!response.ok) throw new Error("Netzwerkfehler");
-            return response.json();
-        })
-        .then(async (books) => {
-            const $listContainer = $('[content="main"] > [top-list] > [list]');
-            $listContainer.empty();
-
-            for (const book of books) {
-                let categoryName = "Unbekannt";
-
-                if (categoryCache[book.category_id]) {
-                    categoryName = categoryCache[book.category_id];
-                } else {
-                    try {
-                        const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
-                        if (catRes.ok) {
-                            const categoryData = await catRes.json();
-                            categoryName = categoryData.name;
-                            categoryCache[book.category_id] = categoryName;
-                        }
-                    } catch (err) {
-                        console.warn("Kategorie konnte nicht geladen werden:", err);
+    .then(response => {
+        if (!response.ok) throw new Error("Netzwerkfehler");
+        return response.json();
+    })
+    .then(async (books) => {
+        const $listContainer = $('[content="main"] > [top-list] > [list]');
+        $listContainer.empty();
+        for (const book of books) {
+            let categoryName = "Unbekannt";
+            if (categoryCache[book.category_id]) {
+                categoryName = categoryCache[book.category_id];
+            } else {
+                try {
+                    const catRes = await fetch(`http://localhost:3000/api/v1/categories`);
+                    if (catRes.ok) {
+                        const categoryData = await catRes.json();
+                        categoryName = categoryData[book.category_id - 1].name;
+                        categoryCache[book.category_id] = categoryName;
                     }
+                } catch (err) {
+                    console.warn("Kategorie konnte nicht geladen werden:", err);
                 }
-
-                const $bookElement = $(`
-                    <div article button="show:book-information" book-cover="${book.id}">
-                        <div category>${categoryName}</div>
-                        <div rate>4.6❤️</div>
-                    </div>
-                `);
-                $listContainer.append($bookElement);
             }
-        })
-        .catch(err => {
-            console.error("Fehler beim Laden der Bücher:", err);
+            const bookId = String(book.book_id).padStart(3, '0');
+            const $bookElement = $(`
+                <div article button="show:book-information" book-cover="${bookId}">
+                    <div category>${categoryName}</div>
+                    <div rate>4.6:herz:</div>
+                </div>
+            `);
+            $listContainer.append($bookElement);
+        }
+        // Nach dem Hinzufügen aller Buchelemente: Cover setzen
+        $('[article]').each(function () {
+            let bookCover = $(this).attr('book-cover');
+            $(this).css('background-image', 'url(./images/book_' + bookCover + '/front.png)');
         });
+    })
+    .catch(err => {
+        console.error("Fehler beim Laden der Bücher:", err);
+    });
+
+    
 });
