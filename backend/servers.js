@@ -394,53 +394,6 @@ app.delete('/api/v1/books/:id', authenticate, async (req, res) => {
 });
 
 
-// 获取购物车内容
-app.get('/api/v1/cart', authenticate, async (req, res) => {
-    if (!req.user || !['privat', 'gewerblich'].includes(req.user.userType)) {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    try {
-        // 获取用户购物车数据（含书籍详情）
-        const [cartItems] = await pool.query(`
-            SELECT
-                c.id,
-                c.quantity,
-                c.created_at,
-                b.title,
-                b.author,
-                b.isbn,
-                b.price
-            FROM cart c
-            INNER JOIN book b ON b.book_id = c.book_id
-            WHERE c.user_id = ?
-            ORDER BY c.created_at DESC
-
-        `, [req.user.userId]);
-
-        // 获取总记录数
-        const [total] = await pool.query(
-            'SELECT COUNT(*) as total FROM cart WHERE user_id = ?',
-            [req.user.userId]
-        );
-
-        res.status(200).json({
-            message: 'Warenkorbdaten',
-            items: cartItems,
-            pagination: {
-                total: total[0].total,
-                page,
-                limit,
-                totalPages: Math.ceil(total[0].total / limit)
-            }
-        });
-
-    } catch (err) {
-        console.error('Warenkorb-GET-Fehler:', err);
-        res.status(500).json({ message: 'Interner Serverfehler' });
-    }
-});
-
 // 1. Warenkorbverwaltung (nur für privat/Gewerbliche Nutzer)
 // Artikel in den Warenkorb legen
 app.post('/api/v1/cart', authenticate, async (req, res) => {
