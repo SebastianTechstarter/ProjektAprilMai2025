@@ -13,7 +13,7 @@ app.use(express.json());
 const dbConfig = {
     host: 'localhost',
     user: 'root',
-    password: 'Breakout_4',
+    password: 'sebastian88',
     database: 'bookbay',
     waitForConnections: true,
     connectionLimit: 1000
