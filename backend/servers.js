@@ -152,6 +152,7 @@ app.put('/api/v1/address/:addressId', authenticate, async (req, res) => {
 app.get('/api/books', async (req, res) => {
     try {
         const [books] = await pool.query('SELECT * FROM book');
+        console.log(books)
         res.json(books);
     } catch (err) {
         console.error('Fehler beim Abrufen der Bücher:', err);

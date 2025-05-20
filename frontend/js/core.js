@@ -262,13 +262,13 @@ $( document ).ready(() => {
         } catch (err) {
             alert(err.message);
         }
-    });
-
     fetch("http://localhost:3000/api/books")
+
         .then(response => {
             if (!response.ok) throw new Error("Netzwerkfehler");
             return response.json();
         })
+
         .then(async (books) => {
             const $listContainer = $('[content="main"] > [top-list] > [list]');
             $listContainer.empty();
@@ -300,6 +300,7 @@ $( document ).ready(() => {
 
                 $listContainer.append($bookElement);
             }
+
         })
         .catch(err => {
             console.error("Fehler beim Laden der Bücher:", err);
@@ -372,4 +373,5 @@ $( document ).ready(() => {
     $(document).on('click', '[button="hide:book-information"]', function () {
         $('[book-information]').hide().empty();
     });
+
 });
