@@ -1,6 +1,6 @@
 $( document ).ready(() => {
 
-    let api_url = 'http://localhost/bookbay-api/';
+    let api_url = 'https://marcel-dorr.de/project-swm/api/';
 
     const $body =            $( 'body' );
     const $main =            $( '[content="main"]' );
@@ -228,7 +228,7 @@ $( document ).ready(() => {
         const bookImage = String(bookId).padStart(3, '0');
 
         try {
-            const res = await fetch("http://localhost/bookbay-api/", {
+            const res = await fetch(api_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'book', book_id: bookId })
@@ -497,7 +497,7 @@ $( document ).ready(() => {
         }
 
         try {
-            const res = await fetch('http://localhost/bookbay-api/', {
+            const res = await fetch(api_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
