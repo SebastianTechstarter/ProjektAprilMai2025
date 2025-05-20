@@ -1,13 +1,13 @@
-$(document).ready(() => {
+$( document ).ready(() => {
     const categoryCache = {};
 
-    const $body = $('body');
-    const $main = $('[content="main"]');
-    const $login = $('[login]');
-    const $register = $('[register]');
-    const $shoppingCart = $('[shopping-cart]');
-    const $bookInformation = $('[book-information]');
-    const $container = $('[quick-category]');
+    const $body =            $( 'body' );
+    const $main =            $( '[content="main"]' );
+    const $login =           $( '[login]' );
+    const $register =        $( '[register]' );
+    const $shoppingCart =    $( '[shopping-cart]' );
+    const $bookInformation = $( '[book-information]' );
+    const $container =       $( '[quick-category]' );
 
     const chunkSize = 8;
     const $buttons = $container.children('div');
@@ -19,7 +19,7 @@ $(document).ready(() => {
         $nextChunk.show();
         currentIndex += chunkSize;
         if (currentIndex >= $buttons.length) {
-            $('[button="more"]').remove();
+            $( '[button="more"]' ).remove();
         }
     }
 
@@ -29,10 +29,10 @@ $(document).ready(() => {
     $container.append($moreButton);
 
     $moreButton.on('click', showNextChunk);
-
+    
     let currentUtterance = null;
-    $('[button]').on("click", function () {
-        switch ($(this).attr('button')) {
+    $( '[button]' ).on( "click", function() {
+        switch ($( this ).attr('button')) {
             case 'switch:background':
                 switchBackground($body.attr('background'));
                 break;
@@ -57,7 +57,7 @@ $(document).ready(() => {
                 break;
             case 'show:book-information':
                 showBookInformation();
-                $book_id = $(this).attr('book-cover');
+                $book_id = $( this ).attr('book-cover');
                 console.log($book_id);
                 break;
             case 'hide:book-information':
@@ -152,7 +152,7 @@ $(document).ready(() => {
     //------------------------------------------------------------------------
     //BUCH COVER
 
-
+    
 
     //------------------------------------------------------------------------
 
@@ -200,7 +200,7 @@ $(document).ready(() => {
     }
 
     $('[button="register:private"], [button="register:company"]').on("click", function (event) {
-        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'privat' : 'gewerblich';
+        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
         let password1 = $('input[name="password-register-1"]').val();
         let password2 = $('input[name="password-register-2"]').val();
 
@@ -230,29 +230,29 @@ $(document).ready(() => {
             },
             body: JSON.stringify(data)
         })
-            .then(async res => {
-                const result = await res.json();
+        .then(async res => {
+            const result = await res.json();
 
-                if (!res.ok) {
-                    // Wenn die API Validierungsfehler schickt
-                    if (result.errors && Array.isArray(result.errors)) {
-                        const messages = result.errors.map(err => `• ${err.msg}`).join('\n');
-                        throw new Error("Registrierung fehlgeschlagen:\n" + messages);
-                    }
-
-                    // Wenn die API andere Fehler zurückgibt
-                    throw new Error(result.message || 'Fehler bei der Registrierung');
+            if (!res.ok) {
+                // Wenn die API Validierungsfehler schickt
+                if (result.errors && Array.isArray(result.errors)) {
+                    const messages = result.errors.map(err => `• ${err.msg}`).join('\n');
+                    throw new Error("Registrierung fehlgeschlagen:\n" + messages);
                 }
 
-                return result;
-            })
-            .then(result => {
-                hideRegister();
-                showLogin();
-            })
-            .catch(err => {
-                alert(err.message);
-            });
+                // Wenn die API andere Fehler zurückgibt
+                throw new Error(result.message || 'Fehler bei der Registrierung');
+            }
+
+            return result;
+        })
+        .then(result => {
+            hideRegister();
+            showLogin();
+        })
+        .catch(err => {
+            alert(err.message);
+        });
     });
 
     $('[button="login"]').on("click", async function () {
@@ -350,48 +350,73 @@ $(document).ready(() => {
         $('[book-information]').hide().empty();
     });
 
+    $('input[name="search"]').on('input', function () {
+        const searchTerm = $(this).val().toLowerCase();
+
+        $('div[article]').each(function () {
+            const $article = $(this);
+            const author = ($article.attr('author') || '').toLowerCase();
+            const category = $article.find('div[category]').text().toLowerCase();
+            const title = ($article.attr('book-cover') || '').toLowerCase();
+            const isbn = ($article.attr('isbn') || '').toLowerCase();
+            const publisher = ($article.attr('publisher') || '').toLowerCase();
+
+            const matches = [author, category, title, isbn, publisher].some(field =>
+                field.includes(searchTerm)
+            );
+
+            $article.toggle(matches);
+        });
+    });
+
     fetch("http://localhost:3000/api/books")
-        .then(response => {
-            if (!response.ok) throw new Error("Netzwerkfehler");
-            return response.json();
-        })
-        .then(async (books) => {
-            const $listContainer = $('[content="main"] > [top-list] > [list]');
-            $listContainer.empty();
-            for (const book of books) {
-                let categoryName = "Unbekannt";
-                if (categoryCache[book.category_id]) {
-                    categoryName = categoryCache[book.category_id];
-                } else {
-                    try {
-                        const catRes = await fetch(`http://localhost:3000/api/v1/categories`);
-                        if (catRes.ok) {
-                            const categoryData = await catRes.json();
-                            categoryName = categoryData[book.category_id - 1].name;
-                            categoryCache[book.category_id] = categoryName;
-                        }
-                    } catch (err) {
-                        console.warn("Kategorie konnte nicht geladen werden:", err);
+    .then(response => {
+        if (!response.ok) throw new Error("Netzwerkfehler");
+        return response.json();
+    })
+    .then(async (books) => {
+        const $listContainer = $('[content="main"] > [top-list] > [list]');
+        $listContainer.empty();
+        for (const book of books) {
+            let categoryName = "Unbekannt";
+            if (categoryCache[book.category_id]) {
+                categoryName = categoryCache[book.category_id];
+            } else {
+                try {
+                    const catRes = await fetch(`http://localhost:3000/api/v1/categories`);
+                    if (catRes.ok) {
+                        const categoryData = await catRes.json();
+                        categoryName = categoryData[book.category_id - 1].name;
+                        categoryCache[book.category_id] = categoryName;
                     }
+                    const pubRes = await fetch(`http://localhost:3000/api/v1/publishers`);
+                    if (pubRes.ok) {
+                        const publisherData = await pubRes.json();
+                        publisherName = publisherData[book.publisher_id - 1].name;
+                    }
+                } catch (err) {
+                    console.warn("Kategorie konnte nicht geladen werden:", err);
                 }
-                const bookId = String(book.book_id).padStart(3, '0');
-                const $bookElement = $(`
-                <div article button="show:book-information" book-cover="${bookId}">
+            }
+            const bookId = String(book.book_id).padStart(3, '0');
+            const randomRate = (Math.random() * 4 + 1).toFixed(1);
+            const $bookElement = $(`
+                <div article button="show:book-information" book-cover="${bookId}" isbn="${book.isbn}" author="${book.author}" publication-year="${book.publication_year}" publisher="${publisherName}">
                     <div category>${categoryName}</div>
-                    <div rate>4.6:herz:</div>
+                    <div rate>${randomRate}❤️</div>
                 </div>
             `);
-                $listContainer.append($bookElement);
-            }
-            // Nach dem Hinzufügen aller Buchelemente: Cover setzen
-            $('[article]').each(function () {
-                let bookCover = $(this).attr('book-cover');
-                $(this).css('background-image', 'url(./images/book_' + bookCover + '/front.png)');
-            });
-        })
-        .catch(err => {
-            console.error("Fehler beim Laden der Bücher:", err);
+            $listContainer.append($bookElement);
+        }
+        // Nach dem Hinzufügen aller Buchelemente: Cover setzen
+        $('[article]').each(function () {
+            let bookCover = $(this).attr('book-cover');
+            $(this).css('background-image', 'url(./images/book_' + bookCover + '/front.png)');
         });
+    })
+    .catch(err => {
+        console.error("Fehler beim Laden der Bücher:", err);
+    });
 
-
+    
 });

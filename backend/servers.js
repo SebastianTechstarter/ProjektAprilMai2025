@@ -13,7 +13,7 @@ app.use(express.json());
 const dbConfig = {
     host: 'localhost',
     user: 'root',
-    password: 'Breakout_4',
+    password: 'sebastian88',
     database: 'bookbay',
     waitForConnections: true,
     connectionLimit: 1000
@@ -40,9 +40,10 @@ const authenticate = async (req, res, next) => {
     }
 };
 
+// Benutzerregistrierung
 app.post('/api/v1/auth/register', [
-    body('email').isEmail().withMessage('Invalid email'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+    body('email').isEmail(),
+    body('password').isLength({ min: 6 })
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -50,32 +51,26 @@ app.post('/api/v1/auth/register', [
     }
 
     const { username, email, password, user_type, payment_method } = req.body;
-
     try {
-        const [existingUsers] = await pool.query(
-            'SELECT user_id FROM user WHERE email = ?',
-            [email]
-        );
-
-        if (existingUsers.length > 0) {
-            return res.status(409).json({ message: 'Email is already registered' });
+        // Überprüfen, ob der Benutzer bereits existiert
+        const [users] = await pool.query('SELECT user_id FROM user WHERE email = ?', [email]);
+        if (users.length > 0) {
+            return res.status(400).json({ message: 'User already exists' });
         }
 
+        // Passwort hashen
         const hashedPassword = await bcrypt.hash(password, 10);
-
         await pool.query(
             'INSERT INTO user (username, email, password_hash, user_type, payment_method) VALUES (?, ?, ?, ?, ?)',
-            [username, email, hashedPassword, user_type, payment_method || null]
+            [username, email, hashedPassword, user_type, payment_method]
         );
 
-        return res.status(201).json({ message: 'User created successfully' });
-
-    } catch (error) {
-        console.error('Error during registration:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        res.status(201).json({ message: 'User created successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
     }
 });
-
 
 // Benutzeranmeldung
 app.post('/api/v1/auth/login', async (req, res) => {
