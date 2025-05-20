@@ -357,7 +357,7 @@ $( document ).ready(() => {
             const $article = $(this);
             const author = ($article.attr('author') || '').toLowerCase();
             const category = $article.find('div[category]').text().toLowerCase();
-            const title = ($article.attr('book-cover') || '').toLowerCase();
+            const title = ($article.attr('title') || '').toLowerCase();
             const isbn = ($article.attr('isbn') || '').toLowerCase();
             const publisher = ($article.attr('publisher') || '').toLowerCase();
 
@@ -378,6 +378,7 @@ $( document ).ready(() => {
         const $listContainer = $('[content="main"] > [top-list] > [list]');
         $listContainer.empty();
         for (const book of books) {
+            let publisherName = '';
             let categoryName = "Unbekannt";
             if (categoryCache[book.category_id]) {
                 categoryName = categoryCache[book.category_id];
@@ -401,7 +402,7 @@ $( document ).ready(() => {
             const bookId = String(book.book_id).padStart(3, '0');
             const randomRate = (Math.random() * 4 + 1).toFixed(1);
             const $bookElement = $(`
-                <div article button="show:book-information" book-cover="${bookId}" isbn="${book.isbn}" author="${book.author}" publication-year="${book.publication_year}" publisher="${publisherName}">
+                <div article button="show:book-information" book-cover="${bookId}" isbn="${book.isbn}" author="${book.author}" publication-year="${book.publication_year}" publisher="${publisherName}" title="${book.title}">
                     <div category>${categoryName}</div>
                     <div rate>${randomRate}❤️</div>
                 </div>
