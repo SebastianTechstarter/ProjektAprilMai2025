@@ -667,14 +667,14 @@ app.post('/api/v1/publishers', authenticate, async (req, res) => {
 
 // Verlage suchen
 app.get('/api/v1/publishers', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
+    // if (!req.user || req.user.userType !== 'admin') {
+    //     return res.status(403).json({ message: 'Zugriff verweigert' });
+    // }
 
     const { name } = req.query;
 
     try {
-        let query = 'SELECT * FROM publisher WHERE 1=1';
+        let query = 'SELECT * FROM publisher';
         const params = [];
 
         if (name) {
