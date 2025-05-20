@@ -369,7 +369,6 @@ $( document ).ready(() => {
         }
     });
 
-
     $(document).on('click', '[button="hide:book-information"]', function () {
         $('[book-information]').hide().empty();
     });
