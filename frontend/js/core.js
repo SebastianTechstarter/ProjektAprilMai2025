@@ -194,6 +194,11 @@ $( document ).ready(() => {
 
     //---------------------------------------------------------
 
+    function generateRandomUsername() {
+        const randomStr = Math.random().toString(36).substring(2, 8); // z. B. '5f3a9c'
+        return 'user_' + randomStr;
+    }
+
     $('[button="register:private"], [button="register:company"]').on("click", function (event) {
         const userType = $(event.currentTarget).is('[button="register:private"]') ? 'privat' : 'gewerblich';
         let password1 = $('input[name="password-register-1"]').val();
@@ -205,7 +210,7 @@ $( document ).ready(() => {
         }
 
         const data = {
-            username: '---',
+            username: generateRandomUsername(),
             email: $('input[name="email"]').val(),
             password: password1,
             user_type: userType,
