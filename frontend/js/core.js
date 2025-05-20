@@ -1,5 +1,7 @@
 $( document ).ready(() => {
 
+    let api_url = 'http://localhost/bookbay-api/';
+
     const $body =            $( 'body' );
     const $main =            $( '[content="main"]' );
     const $login =           $( '[login]' );
@@ -171,7 +173,7 @@ $( document ).ready(() => {
             user_type: userType
         };
 
-        fetch('http://localhost/bookbay-api/', {
+        fetch(api_url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -203,7 +205,7 @@ $( document ).ready(() => {
             password: $('div[login] input[name="password"]').val()
         };
 
-        fetch('http://localhost/bookbay-api/', {
+        fetch(api_url, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(loginData)
@@ -224,6 +226,7 @@ $( document ).ready(() => {
     $(document).on('click', '[button="show:book-information"]', async function () {
         const bookId = $(this).attr('book-cover');
         const bookImage = String(bookId).padStart(3, '0');
+
         try {
             const res = await fetch("http://localhost/bookbay-api/", {
                 method: 'POST',
@@ -238,40 +241,57 @@ $( document ).ready(() => {
             const price = parseFloat(book.price).toFixed(2);
             const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
 
+            // ✅ Titel-Text prüfen, ob Buch schon im Warenkorb ist
+            const bookTitle = book.title.trim();
+            let alreadyInCart = false;
+
+            $('[shopping-cart] [element] [text]').each(function () {
+                const fullText = $(this).text().trim(); // z. B. "RomanDer kleine Prinz"
+                if (fullText.includes(bookTitle)) {
+                    alreadyInCart = true;
+                    return false; // break loop
+                }
+            });
+
+            const addToCartBtn = alreadyInCart
+                ? `<div button disabled class="disabled">✔ Bereits im Warenkorb</div>`
+                : `<div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>`;
+
             const bookHtml = `
-                    <div button="hide:book-information">
-                        <i class="fa fa-times" aria-hidden="true"></i>
+                <div button="hide:book-information">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </div>
+                <div book-image style="background-image: url(./images/book_${bookImage}/front.png);">
+                    <div book-autor></div>
+                </div>
+                <div book-info>
+                    <div element>Author/in:<span>${book.author}</span></div>
+                    <div element>Veröffentlichung:<span>${book.publication_year}</span></div>
+                    <div element>Kategorie:<span>${categoryName}</span></div>
+                    <div element>Seiten:<span>${book.page_count}</span></div>
+                    <div element>Title:<span>${book.title}</span></div>
+                    <div element>Preis:<span>${price}€ ${oldPrice}</span></div>
+                    <div menu>
+                        ${addToCartBtn}
+                        <div button="addto:library">+ Bibliothek</div>
                     </div>
-                    <div book-image style="background-image: url(./images/book_${bookImage}/front.png);">
-                        <div book-autor></div>
+                </div>
+                <div book-description>
+                    Klappentext:<span>${book.description}</span>
+                    <div menu>
+                        <div button="read:text"><i class="fa fa-play"></i></div>
+                        <div button="pause:text"><i class="fa fa-pause"></i></div>
+                        <div button="resume:text"><i class="fa fa-play-circle"></i></div>
+                        <div button="stop:text"><i class="fa fa-stop"></i></div>
                     </div>
-                    <div book-info>
-                        <div element>Author/in:<span>${book.author}</span></div>
-                        <div element>Veröffentlichung:<span>${book.publication_year}</span></div>
-                        <div element>Kategorie:<span>${categoryName}</span></div>
-                        <div element>Seiten:<span>${book.page_count}</span></div>
-                        <div element>Title:<span>${book.title}</span></div>
-                        <div element>Preis:<span>${price}€ ${oldPrice}</span></div>
-                        <div menu>
-                            <div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>
-                            <div button="addto:library">+ Bibliothek</div>
-                        </div>
-                    </div>
-                    <div book-description>
-                        Klappentext:<span>${book.description}</span>
-                        <div menu>
-                            <div button="read:text"><i class="fa fa-play"></i></div>
-                            <div button="pause:text"><i class="fa fa-pause"></i></div>
-                            <div button="resume:text"><i class="fa fa-play-circle"></i></div>
-                            <div button="stop:text"><i class="fa fa-stop"></i></div>
-                        </div>
-                    </div>
+                </div>
             `;
+
             $('[book-information] > [form]').html(bookHtml);
             $('[book-information]').css('display', 'flex');
 
-            $( '[button]' ).on( "click", function() {
-                switch ($( this ).attr('button')) {
+            $('[button]').on("click", function () {
+                switch ($(this).attr('button')) {
                     case 'read:text':
                         const text = $('[book-description] > span').text().trim();
                         function speak(text) {
@@ -315,9 +335,6 @@ $( document ).ready(() => {
                         break;
                 }
             });
-
-
-
         } catch (err) {
             console.error("Fehler beim Abrufen der Buchdetails:", err);
         }
@@ -351,14 +368,17 @@ $( document ).ready(() => {
     $(document).on('click', '[button^="addto:shopping-cart"]', async function () {
         const bookData = $(this).attr('book-data');
         if (!bookData) return;
+
         const storedUser = sessionStorage.getItem('user');
         if (!storedUser) return;
+
         const user = JSON.parse(storedUser);
         const [bookId, title, category, price] = bookData.split(';');
         const quantity = 1;
         const uniqueId = 'article_' + bookId;
+
         try {
-            const res = await fetch('http://localhost/bookbay-api/', {
+            const res = await fetch(api_url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -395,6 +415,14 @@ $( document ).ready(() => {
                     $('div[shopping-cart] div[list]').append(elementHTML);
                     updateCart();
                 }
+
+                loadCart();
+
+                // ⬇️ HIER wird der Button deaktiviert
+                $(this).removeAttr('button')
+                    .removeAttr('book-data')
+                    .addClass('disabled')
+                    .text('✔ Bereits im Warenkorb');
             } else {
                 alert("Fehler: " + result.message);
             }
@@ -404,26 +432,111 @@ $( document ).ready(() => {
         }
     });
 
-    // Optional: Löschen eines Elements
-    $(document).on('click', '[button^="delete:"]', function () {
-        $(this).closest('div[element]').remove();
+    $(document).on('click', '[button^="delete:"]', async function () {
+        const storedUser = sessionStorage.getItem('user');
+        if (!storedUser) {
+            alert("Du bist nicht eingeloggt.");
+            return;
+        }
+
+        const user = JSON.parse(storedUser);
+
+        const buttonAttr = $(this).attr('button'); // z.B. delete:article_42
+        const match = buttonAttr.match(/^delete:article_(\d+)$/);
+        if (!match) return;
+
+        const bookId = parseInt(match[1], 10);
+
+        try {
+            const res = await fetch(api_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'remove_from_cart',
+                    user_id: user.id,
+                    book_id: bookId
+                })
+            });
+
+            const result = await res.json();
+
+            if (result.success) {
+                $(this).closest('[element]').remove();
+                updateCart();
+            } else {
+                alert("Fehler beim Entfernen: " + result.message);
+            }
+
+        } catch (err) {
+            console.error("Fehler beim Entfernen des Artikels:", err);
+            alert("Verbindung zur API fehlgeschlagen.");
+        }
+    });
+
+    $(document).on('change', 'div[shopping-cart] input[type="number"]', async function () {
+        const storedUser = sessionStorage.getItem('user');
+        if (!storedUser) {
+            alert("Du bist nicht eingeloggt.");
+            return;
+        }
+
+        const user = JSON.parse(storedUser);
+
+        const $input = $(this);
+        const nameAttr = $input.attr('name'); // z.B. article_42
+        const match = nameAttr.match(/^article_(\d+)$/);
+        if (!match) return;
+
+        const bookId = parseInt(match[1], 10);
+        const quantity = parseInt($input.val(), 10);
+
+        if (isNaN(quantity) || quantity < 1) {
+            alert("Ungültige Menge.");
+            $input.val(1);
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost/bookbay-api/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_cart_quantity',
+                    user_id: user.id,
+                    book_id: bookId,
+                    quantity: quantity
+                })
+            });
+
+            const result = await res.json();
+
+            if (!result.success) {
+                alert("Fehler beim Aktualisieren: " + result.message);
+            } else {
+                updateCart(); // Optional: Gesamtpreis neu berechnen
+            }
+
+        } catch (err) {
+            console.error("Fehler beim Aktualisieren der Menge:", err);
+            alert("Serverfehler bei der Aktualisierung.");
+        }
     });
 
     (async () => {
         try {
             // Alle Daten gleichzeitig über POST laden
             const [booksRes, categoriesRes, publishersRes] = await Promise.all([
-                fetch("http://localhost/bookbay-api/", {
+                fetch(api_url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'books' })
                 }),
-                fetch("http://localhost/bookbay-api/", {
+                fetch(api_url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'categories' })
                 }),
-                fetch("http://localhost/bookbay-api/", {
+                fetch(api_url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'publishers' })
@@ -494,7 +607,7 @@ $( document ).ready(() => {
         const user = JSON.parse(storedUser);
 
         try {
-            const res = await fetch('http://localhost/bookbay-api/', {
+            const res = await fetch(api_url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
