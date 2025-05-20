@@ -195,7 +195,7 @@ $( document ).ready(() => {
     //---------------------------------------------------------
 
     $('[button="register:private"], [button="register:company"]').on("click", function (event) {
-        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
+        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'privat' : 'gewerblich';
         let password1 = $('input[name="password-register-1"]').val();
         let password2 = $('input[name="password-register-2"]').val();
 
@@ -209,7 +209,7 @@ $( document ).ready(() => {
             email: $('input[name="email"]').val(),
             password: password1,
             user_type: userType,
-            payment_method: 0 // Oder hole dies aus einem echten Feld
+            payment_method: 'iban'
         };
 
         fetch('http://localhost:3000/api/v1/auth/register', {
