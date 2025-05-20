@@ -211,7 +211,7 @@ $( document ).ready(() => {
 
         const data = {
             username: generateRandomUsername(),
-            email: $('input[name="email"]').val(),
+            email: $('input[name="register-email"]').val(),
             password: password1,
             user_type: userType,
             payment_method: 'iban'
