@@ -13,7 +13,7 @@ app.use(express.json());
 const dbConfig = {
     host: 'localhost',
     user: 'root',
-    password: 'sebastian88',
+    password: 'Breakout_4',
     database: 'bookbay',
     waitForConnections: true,
     connectionLimit: 1000
@@ -40,10 +40,9 @@ const authenticate = async (req, res, next) => {
     }
 };
 
-// Benutzerregistrierung
 app.post('/api/v1/auth/register', [
-    body('email').isEmail(),
-    body('password').isLength({ min: 6 })
+    body('email').isEmail().withMessage('Invalid email'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -51,26 +50,64 @@ app.post('/api/v1/auth/register', [
     }
 
     const { username, email, password, user_type, payment_method } = req.body;
-    try {
-        // Überprüfen, ob der Benutzer bereits existiert
-        const [users] = await pool.query('SELECT user_id FROM user WHERE email = ?', [email]);
-        if (users.length > 0) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
 
-        // Passwort hashen
-        const hashedPassword = await bcrypt.hash(password, 10);
-        await pool.query(
-            'INSERT INTO user (username, email, password_hash, user_type, payment_method) VALUES (?, ?, ?, ?, ?)',
-            [username, email, hashedPassword, user_type, payment_method]
+    try {
+        const [existingUsers] = await pool.query(
+            'SELECT user_id FROM user WHERE email = ?',
+            [email]
         );
 
-        res.status(201).json({ message: 'User created successfully' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        if (existingUsers.length > 0) {
+            return res.status(409).json({ message: 'Email is already registered' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await pool.query(
+            'INSERT INTO user (username, email, password_hash, user_type, payment_method) VALUES (?, ?, ?, ?, ?)',
+            [username, email, hashedPassword, user_type, payment_method || null]
+        );
+
+        return res.status(201).json({ message: 'User created successfully' });
+
+    } catch (error) {
+        console.error('Error during registration:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+// Benutzerregistrierung
+// app.post('/api/v1/auth/register', [
+//     body('email').isEmail(),
+//     body('password')
+//         .isLength({ min: 6 })
+//         .withMessage('Passwort muss mindestens 6 Zeichen lang sein'),
+
+
+// ], async (req, res) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+//     try {
+//         const { username, email, password, user_type, payment_method } = req.body;
+
+
+//         const existingUser = await pool.findOne('SELECT user_id FROM user WHERE email = ?', [email]);
+//         if (existingUser) return res.status(409).json({ error: 'E-Mail existiert bereits' });
+
+
+//         // Passwort hashen
+//         const hashedPassword = await bcrypt.hash(password, 10);
+//         await pool.query(
+//             'INSERT INTO user (username, email, password_hash, user_type, payment_method) VALUES (?, ?, ?, ?, ?)',
+//             [username, email, hashedPassword, user_type, payment_method]
+//         );
+
+//         res.status(201).json({ message: 'User created successfully' });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ message: 'Server error' });
+//     }
+// });
 
 // Benutzeranmeldung
 app.post('/api/v1/auth/login', async (req, res) => {
