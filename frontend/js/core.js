@@ -197,7 +197,7 @@ $( document ).ready(() => {
     $('[button="register:private"], [button="register:company"]').on("click", function (event) {
         const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
 
-        if ($('input[name="password"]').val() !== $('input[name="passwordr"]').val()) {
+        if ($('input[name="password"]').val() != $('input[name="passwordr"]').val()) {
             alert("Passwörter stimmen nicht überein.");
             return;
         }
