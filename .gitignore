@@ -8,6 +8,9 @@ readme_c.md
 /.vscode
 *.test.*
 index_t.html
+selectCategory.sql
+*copy.*
+
 
 # testing
 /coverage

@@ -393,6 +393,54 @@ app.delete('/api/v1/books/:id', authenticate, async (req, res) => {
     }
 });
 
+
+// 获取购物车内容
+app.get('/api/v1/cart', authenticate, async (req, res) => {
+    if (!req.user || !['privat', 'gewerblich'].includes(req.user.userType)) {
+        return res.status(403).json({ message: 'Zugriff verweigert' });
+    }
+
+    try {
+        // 获取用户购物车数据（含书籍详情）
+        const [cartItems] = await pool.query(`
+            SELECT
+                c.id,
+                c.quantity,
+                c.created_at,
+                b.title,
+                b.author,
+                b.isbn,
+                b.price
+            FROM cart c
+            INNER JOIN book b ON b.book_id = c.book_id
+            WHERE c.user_id = ?
+            ORDER BY c.created_at DESC
+
+        `, [req.user.userId]);
+
+        // 获取总记录数
+        const [total] = await pool.query(
+            'SELECT COUNT(*) as total FROM cart WHERE user_id = ?',
+            [req.user.userId]
+        );
+
+        res.status(200).json({
+            message: 'Warenkorbdaten',
+            items: cartItems,
+            pagination: {
+                total: total[0].total,
+                page,
+                limit,
+                totalPages: Math.ceil(total[0].total / limit)
+            }
+        });
+
+    } catch (err) {
+        console.error('Warenkorb-GET-Fehler:', err);
+        res.status(500).json({ message: 'Interner Serverfehler' });
+    }
+});
+
 // 1. Warenkorbverwaltung (nur für privat/Gewerbliche Nutzer)
 // Artikel in den Warenkorb legen
 app.post('/api/v1/cart', authenticate, async (req, res) => {
@@ -567,6 +615,51 @@ app.post('/api/v1/wishlist', authenticate, async (req, res) => {
     }
 });
 
+app.get('/api/v1/wishlist', authenticate, async (req, res) => {
+
+    if (!req.user || !['privat', 'gewerblich'].includes(req.user.userType)) {
+        return res.status(403).json({ message: 'Zugriff verweigert' });
+    }
+
+    try {
+
+        const [wishlistItems] = await pool.query(`
+            SELECT
+                w.wishlist_id,
+                w.priority,
+                w.created_at,
+                b.isbn AS book_isbn,
+                b.title AS book_title,
+                b.author AS book_author
+            FROM wishlist w
+            INNER JOIN book b ON w.book_id = b.book_id
+            WHERE w.user_id = ?
+            ORDER BY w.created_at DESC
+        `, [req.user.userId]);
+
+        const responseItems = wishlistItems.map(item => ({
+            wishlist_id: item.wishlist_id,
+            priority: item.priority,
+            created_at: item.created_at,
+            book: {
+                isbn: item.book_isbn,
+                title: item.book_title,
+                author: item.book_author
+            }
+        }));
+
+        res.status(200).json({
+            message: 'Wunschliste Daten',
+            items: responseItems,
+            count: wishlistItems.length
+        });
+
+    } catch (err) {
+        console.error('Wunschliste-GET-Fehler:', err);
+        res.status(500).json({ message: 'Interner Serverfehler' });
+    }
+});
+
 // Wunschliste-Eintrag löschen
 app.delete('/api/v1/wishlist/:wishlistId', authenticate, async (req, res) => {
     if (!req.user || !['privat', 'gewerblich'].includes(req.user.userType)) {
@@ -629,37 +722,6 @@ app.post('/api/v1/books', authenticate, async (req, res) => {
     }
 });
 
-// Verlagsverwaltung (nur für Admins)
-// Verlag erstellen
-app.post('/api/v1/publishers', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    const { name, contact_info } = req.body;
-
-    try {
-        // Überprüfen auf Pflichtfelder
-        if (!name) {
-            return res.status(400).json({ message: 'Verlagsname ist erforderlich' });
-        }
-
-        // Neuen Verlag erstellen
-        const [result] = await pool.query(
-            'INSERT INTO publisher (name, contact_info) VALUES (?, ?)',
-            [name, contact_info]
-        );
-
-        res.status(201).json({
-            message: 'Verlag erfolgreich erstellt',
-            publisherId: result.insertId
-        });
-    } catch (err) {
-        console.error('Verlags-Erstellungsfehler:', err);
-        res.status(500).json({ message: 'Interner Serverfehler' });
-    }
-});
-
 // Verlage suchen
 app.get('/api/v1/publishers', async (req, res) => {
     // if (!req.user || req.user.userType !== 'admin') {
@@ -685,100 +747,6 @@ app.get('/api/v1/publishers', async (req, res) => {
     }
 });
 
-// Verlag aktualisieren
-app.put('/api/v1/publishers/:publisherId', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    const publisherId = req.params.publisherId;
-    const updateData = req.body;
-
-    try {
-        // Überprüfen ob Verlag existiert
-        const [existingPublisher] = await pool.query(
-            'SELECT publisher_id FROM publisher WHERE publisher_id = ?',
-            [publisherId]
-        );
-        if (existingPublisher.length === 0) {
-            return res.status(404).json({ message: 'Verlag nicht gefunden' });
-        }
-
-        // Aktualisieren
-        await pool.query(
-            'UPDATE publisher SET ? WHERE publisher_id = ?',
-            [updateData, publisherId]
-        );
-
-        res.json({ message: 'Verlag erfolgreich aktualisiert' });
-    } catch (err) {
-        console.error('Verlags-Aktualisierungsfehler:', err);
-        res.status(500).json({ message: 'Aktualisierungsfehler' });
-    }
-});
-
-// Verlag löschen
-app.delete('/api/v1/publishers/:publisherId', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    const publisherId = req.params.publisherId;
-
-    try {
-        // Überprüfen ob Verlag existiert
-        const [existingPublisher] = await pool.query(
-            'SELECT publisher_id FROM publisher WHERE publisher_id = ?',
-            [publisherId]
-        );
-        if (existingPublisher.length === 0) {
-            return res.status(404).json({ message: 'Verlag nicht gefunden' });
-        }
-
-        // Löschen
-        await pool.query(
-            'DELETE FROM publisher WHERE publisher_id = ?',
-            [publisherId]
-        );
-
-        res.status(204).send();
-    } catch (err) {
-        console.error('Verlags-Löschfehler:', err);
-        res.status(500).json({ message: 'Löschfehler' });
-    }
-});
-
-// Kategorienverwaltung (nur für Admins)
-// Kategorie erstellen
-app.post('/api/v1/categories', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    const { name } = req.body;
-
-    try {
-        // Überprüfen auf Pflichtfelder
-        if (!name) {
-            return res.status(400).json({ message: 'Kategoriename ist erforderlich' });
-        }
-
-        // Neue Kategorie erstellen
-        const [result] = await pool.query(
-            'INSERT INTO category (name,) VALUES (?)',
-            [name]
-        );
-
-        res.status(201).json({
-            message: 'Kategorie erfolgreich erstellt',
-            categoryId: result.insertId
-        });
-    } catch (err) {
-        console.error('Kategorie-Erstellungsfehler:', err);
-        res.status(500).json({ message: 'Interner Serverfehler' });
-    }
-});
-
 // Kategorien suchen
 app.get('/api/v1/categories', async (req, res) => {
     try {
@@ -787,69 +755,6 @@ app.get('/api/v1/categories', async (req, res) => {
     } catch (err) {
         console.error('Kategorie-Suchfehler:', err);
         res.status(500).json({ message: 'Suchfehler' });
-    }
-});
-
-// Kategorie aktualisieren
-app.put('/api/v1/categories/:categoryId', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    const categoryId = req.params.categoryId;
-    const updateData = req.body;
-
-    try {
-        // Überprüfen ob Kategorie existiert
-        const [existingCategory] = await pool.query(
-            'SELECT category_id FROM category WHERE category_id = ?',
-            [categoryId]
-        );
-        if (existingCategory.length === 0) {
-            return res.status(404).json({ message: 'Kategorie nicht gefunden' });
-        }
-
-        // Aktualisieren
-        await pool.query(
-            'UPDATE category SET ? WHERE category_id = ?',
-            [updateData, categoryId]
-        );
-
-        res.json({ message: 'Kategorie erfolgreich aktualisiert' });
-    } catch (err) {
-        console.error('Kategorie-Aktualisierungsfehler:', err);
-        res.status(500).json({ message: 'Aktualisierungsfehler' });
-    }
-});
-
-// Kategorie löschen
-app.delete('/api/v1/categories/:categoryId', authenticate, async (req, res) => {
-    if (!req.user || req.user.userType !== 'admin') {
-        return res.status(403).json({ message: 'Zugriff verweigert' });
-    }
-
-    const categoryId = req.params.categoryId;
-
-    try {
-        // Überprüfen ob Kategorie existiert
-        const [existingCategory] = await pool.query(
-            'SELECT category_id FROM category WHERE category_id = ?',
-            [categoryId]
-        );
-        if (existingCategory.length === 0) {
-            return res.status(404).json({ message: 'Kategorie nicht gefunden' });
-        }
-
-        // Löschen
-        await pool.query(
-            'DELETE FROM category WHERE category_id = ?',
-            [categoryId]
-        );
-
-        res.status(204).send();
-    } catch (err) {
-        console.error('Kategorie-Löschfehler:', err);
-        res.status(500).json({ message: 'Löschfehler' });
     }
 });
 
