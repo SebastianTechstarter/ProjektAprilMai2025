@@ -262,45 +262,6 @@ $( document ).ready(() => {
         } catch (err) {
             alert(err.message);
         }
-        fetch("http://localhost:3000/api/books")
-            .then(response => {
-                if (!response.ok) throw new Error("Netzwerkfehler");
-                return response.json();
-            })
-            .then(async (books) => {
-                const $listContainer = $('[content="main"] > [top-list] > [list]');
-                $listContainer.empty();
-
-                for (const book of books) {
-                    let categoryName = "Unbekannt";
-
-                    if (categoryCache[book.category_id]) {
-                        categoryName = categoryCache[book.category_id];
-                    } else {
-                        try {
-                            const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
-                            if (catRes.ok) {
-                                const categoryData = await catRes.json();
-                                categoryName = categoryData.name;
-                                categoryCache[book.category_id] = categoryName;
-                            }
-                        } catch (err) {
-                            console.warn("Kategorie konnte nicht geladen werden:", err);
-                        }
-                    }
-
-                    const $bookElement = $(`
-                        <div article button="show:book-information" book-cover="${book.id}">
-                            <div category>${categoryName}</div>
-                            <div rate>4.6❤️</div>
-                        </div>
-                    `);
-                    $listContainer.append($bookElement);
-                }
-            })
-            .catch(err => {
-                console.error("Fehler beim Laden der Bücher:", err);
-            });
     });
 
     $(document).on('click', '[button="show:book-information"]', async function () {
@@ -369,4 +330,44 @@ $( document ).ready(() => {
     $(document).on('click', '[button="hide:book-information"]', function () {
         $('[book-information]').hide().empty();
     });
+
+    fetch("http://localhost:3000/api/books")
+        .then(response => {
+            if (!response.ok) throw new Error("Netzwerkfehler");
+            return response.json();
+        })
+        .then(async (books) => {
+            const $listContainer = $('[content="main"] > [top-list] > [list]');
+            $listContainer.empty();
+
+            for (const book of books) {
+                let categoryName = "Unbekannt";
+
+                if (categoryCache[book.category_id]) {
+                    categoryName = categoryCache[book.category_id];
+                } else {
+                    try {
+                        const catRes = await fetch(`http://localhost:3000/api/v1/categories/${book.category_id}`);
+                        if (catRes.ok) {
+                            const categoryData = await catRes.json();
+                            categoryName = categoryData.name;
+                            categoryCache[book.category_id] = categoryName;
+                        }
+                    } catch (err) {
+                        console.warn("Kategorie konnte nicht geladen werden:", err);
+                    }
+                }
+
+                const $bookElement = $(`
+                    <div article button="show:book-information" book-cover="${book.id}">
+                        <div category>${categoryName}</div>
+                        <div rate>4.6❤️</div>
+                    </div>
+                `);
+                $listContainer.append($bookElement);
+            }
+        })
+        .catch(err => {
+            console.error("Fehler beim Laden der Bücher:", err);
+        });
 });
