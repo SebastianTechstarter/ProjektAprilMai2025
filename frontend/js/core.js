@@ -436,6 +436,5 @@ $( document ).ready(() => {
     .catch(err => {
         console.error("Fehler beim Laden der Bücher:", err);
     });
-
     
 });
