@@ -200,7 +200,7 @@ $( document ).ready(() => {
     }
 
     $('[button="register:private"], [button="register:company"]').on("click", function (event) {
-        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'privat' : 'gewerblich';
+        const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
         let password1 = $('input[name="password-register-1"]').val();
         let password2 = $('input[name="password-register-2"]').val();
 
