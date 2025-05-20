@@ -1,5 +1,6 @@
 $( document ).ready(() => {
     const categoryCache = {};
+    const publisherCache = {};
 
     const $body =            $( 'body' );
     const $main =            $( '[content="main"]' );
@@ -381,8 +382,9 @@ $( document ).ready(() => {
         for (const book of books) {
             let publisherName = '';
             let categoryName = "Unbekannt";
-            if (categoryCache[book.category_id]) {
+            if (categoryCache[book.category_id] && publisherCache[book.publisher_id]) {
                 categoryName = categoryCache[book.category_id];
+                publisherName = publisherCache[book.publisher_id];
             } else {
                 try {
                     const catRes = await fetch(`http://localhost:3000/api/v1/categories`);
@@ -395,6 +397,7 @@ $( document ).ready(() => {
                     if (pubRes.ok) {
                         const publisherData = await pubRes.json();
                         publisherName = publisherData[book.publisher_id - 1].name;
+                        publisherCache[book.publisher_id] = publisherName;
                     }
                 } catch (err) {
                     console.warn("Kategorie konnte nicht geladen werden:", err);
