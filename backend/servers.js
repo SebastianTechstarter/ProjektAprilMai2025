@@ -13,7 +13,7 @@ app.use(express.json());
 const dbConfig = {
     host: 'localhost',
     user: 'root',
-    password: 'sebastian88',
+    password: 'Breakout_4',
     database: 'bookbay',
     waitForConnections: true,
     connectionLimit: 1000
@@ -661,7 +661,7 @@ app.post('/api/v1/publishers', authenticate, async (req, res) => {
 });
 
 // Verlage suchen
-app.get('/api/v1/publishers', authenticate, async (req, res) => {
+app.get('/api/v1/publishers', async (req, res) => {
     // if (!req.user || req.user.userType !== 'admin') {
     //     return res.status(403).json({ message: 'Zugriff verweigert' });
     // }
