@@ -196,8 +196,10 @@ $( document ).ready(() => {
 
     $('[button="register:private"], [button="register:company"]').on("click", function (event) {
         const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
+        let password1 = $('input[name="password-register-1"]').val();
+        let password2 = $('input[name="password-register-2"]').val();
 
-        if ($('input[name="password"]').val() != $('input[name="passwordr"]').val()) {
+        if (password1 !== password2) {
             alert("Passwörter stimmen nicht überein.");
             return;
         }
@@ -205,9 +207,9 @@ $( document ).ready(() => {
         const data = {
             username: '---',
             email: $('input[name="email"]').val(),
-            password: $('input[name="password"]').val(),
+            password: password1,
             user_type: userType,
-            payment_method: 0
+            payment_method: 0 // Oder hole dies aus einem echten Feld
         };
 
         fetch('http://localhost:3000/api/v1/auth/register', {
@@ -218,11 +220,20 @@ $( document ).ready(() => {
             body: JSON.stringify(data)
         })
         .then(async res => {
+            const result = await res.json();
+
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.message || 'Fehler bei Registrierung');
+                // Wenn die API Validierungsfehler schickt
+                if (result.errors && Array.isArray(result.errors)) {
+                    const messages = result.errors.map(err => `• ${err.msg}`).join('\n');
+                    throw new Error("Registrierung fehlgeschlagen:\n" + messages);
+                }
+
+                // Wenn die API andere Fehler zurückgibt
+                throw new Error(result.message || 'Fehler bei der Registrierung');
             }
-            return res.json();
+
+            return result;
         })
         .then(result => {
             hideRegister();
