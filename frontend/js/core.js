@@ -217,6 +217,12 @@ $( document ).ready(() => {
             payment_method: 'iban'
         };
 
+        console.log('USERNAME: ' + data.username);
+        console.log('EMAIL: ' + data.email);
+        console.log('PASSWORD: ' + data.password);
+        console.log('TYPE: ' + data.user_type);
+        console.log('METHOD: ' + data.payment_method);
+
         fetch('http://localhost:3000/api/v1/auth/register', {
             method: 'POST',
             headers: {
