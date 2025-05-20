@@ -350,6 +350,25 @@ $( document ).ready(() => {
         $('[book-information]').hide().empty();
     });
 
+    $('input[name="search"]').on('input', function () {
+        const searchTerm = $(this).val().toLowerCase();
+
+        $('div[article]').each(function () {
+            const $article = $(this);
+            const author = ($article.attr('author') || '').toLowerCase();
+            const category = $article.find('div[category]').text().toLowerCase();
+            const title = ($article.attr('book-cover') || '').toLowerCase();
+            const isbn = ($article.attr('isbn') || '').toLowerCase();
+            const publisher = ($article.attr('publisher') || '').toLowerCase();
+
+            const matches = [author, category, title, isbn, publisher].some(field =>
+                field.includes(searchTerm)
+            );
+
+            $article.toggle(matches);
+        });
+    });
+
     fetch("http://localhost:3000/api/books")
     .then(response => {
         if (!response.ok) throw new Error("Netzwerkfehler");
@@ -370,15 +389,21 @@ $( document ).ready(() => {
                         categoryName = categoryData[book.category_id - 1].name;
                         categoryCache[book.category_id] = categoryName;
                     }
+                    const pubRes = await fetch(`http://localhost:3000/api/v1/publishers`);
+                    if (pubRes.ok) {
+                        const publisherData = await pubRes.json();
+                        publisherName = publisherData[book.publisher_id - 1].name;
+                    }
                 } catch (err) {
                     console.warn("Kategorie konnte nicht geladen werden:", err);
                 }
             }
             const bookId = String(book.book_id).padStart(3, '0');
+            const randomRate = (Math.random() * 4 + 1).toFixed(1);
             const $bookElement = $(`
-                <div article button="show:book-information" book-cover="${bookId}">
+                <div article button="show:book-information" book-cover="${bookId}" isbn="${book.isbn}" author="${book.author}" publication-year="${book.publication_year}" publisher="${publisherName}">
                     <div category>${categoryName}</div>
-                    <div rate>4.6:herz:</div>
+                    <div rate>${randomRate}❤️</div>
                 </div>
             `);
             $listContainer.append($bookElement);
