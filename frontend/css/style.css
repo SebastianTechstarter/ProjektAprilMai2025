@@ -579,7 +579,7 @@ body[background="5"] {
     position: relative;
     width: 240px;
     height: 360px;
-    background-color:#c2c2c2;
+    background-color:#494949;
     border-radius: 6px;
     overflow: hidden;
     transform: scale(1);
@@ -647,6 +647,7 @@ body[background="5"] {
     padding: 20px 44px;
     background-color: #ffffff;
     border-radius: 10px;
+    width: 700px;
 }
 
 [book-information] > [form] > [button="hide:book-information"] {
@@ -664,6 +665,7 @@ body[background="5"] {
     height: 360px;
     border-radius: 6px;
     overflow: hidden;
+    background-color:#494949;
     background-position: center center;
     background-size: 100%;
     background-repeat: no-repeat;
