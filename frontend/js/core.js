@@ -171,12 +171,21 @@ $( document ).ready(() => {
         });
     });
 
-    $('[button="login"]').on("click", async function () {
+    function handleLogin() {
+        const email = $('div[login] input[name="email"]').val().trim();
+        const password = $('div[login] input[name="password"]').val().trim();
+
+        if (!email || !password) {
+            alert('Bitte füllen Sie alle Felder aus.');
+            return;
+        }
+
         const loginData = {
             action: 'login',
-            email: $('div[login] input[name="email"]').val(),
-            password: $('div[login] input[name="password"]').val()
+            email: email,
+            password: password
         };
+
         fetch(api_url, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -193,7 +202,9 @@ $( document ).ready(() => {
             }
         })
         .catch(err => alert('Fehler: ' + err.message));
-    });
+    }
+
+    $('[button="login"]').on("click", handleLogin);
 
     $(document).on('click', '[button="show:book-information"]', async function () {
         const bookId = $(this).attr('book-cover');
@@ -459,7 +470,6 @@ $( document ).ready(() => {
 
     (async () => {
         try {
-            // Alle Daten gleichzeitig über POST laden
             const [booksRes, categoriesRes, publishersRes] = await Promise.all([
                 fetch(api_url, {
                     method: 'POST',
