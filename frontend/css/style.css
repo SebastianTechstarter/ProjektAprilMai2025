@@ -629,6 +629,23 @@ body[background="5"] {
     height: 100%;
 }
 
+[content="main"] > [profile] > [content] {
+    background-color: #ffffff;
+    border: 1px solid #555555;
+    border-radius: 5px;
+}
+
+[content="main"] > [profile] > [content] > [element] {
+    display: flex;
+    gap: 20px;
+    padding: 10px 20px;
+    align-items: center;
+}
+
+[content="main"] > [profile] > [content] > [element]:not(:last-child) {
+    border-bottom: 1px dashed #555555;
+}
+
 /*--------------------------------------------------------*/
 /*BUCH INFORMATION*/
 
