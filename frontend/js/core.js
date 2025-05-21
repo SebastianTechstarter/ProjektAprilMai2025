@@ -47,6 +47,12 @@ $( document ).ready(() => {
             case 'hide:profile':
                 hideProfile();
                 break;
+            case 'show:my-shop':
+                alert("Eine neue Funktion steht in den Startlöchern – sie kann alles, außer Kaffee kochen. (Noch!)");
+                break;
+            case 'show:messages':
+                alert("Was lange währt, wird endlich geil. Bald ist es so weit!");
+                break;
         }
     });
 
