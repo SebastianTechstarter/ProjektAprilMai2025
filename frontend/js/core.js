@@ -9,6 +9,8 @@ $( document ).ready(() => {
     const $bookInformation = $( '[book-information]' );
 
     let currentUtterance = null;
+
+    updateAfterLogin();
     
     $( '[button]' ).on( "click", function() {
         switch ($( this ).attr('button')) {
@@ -88,11 +90,15 @@ $( document ).ready(() => {
     }
 
     function updateAfterLogin() {
-        const loginButton = $('div[button="show:login"]');
-        if (loginButton.length) {
-            loginButton.attr('button', 'show:profile');
+        const storedUser = sessionStorage.getItem('user');
+        if (storedUser) {
+            const loginButton = $('div[button="show:login"]');
+            if (loginButton.length) {
+                loginButton.attr('button', 'show:profile');
+            }
+            $('div[login]').remove();
+            $('div[register]').remove();
         }
-        $('div[login]').remove();
     }
 
     function handleLogin() {
@@ -583,5 +589,4 @@ $( document ).ready(() => {
     })();
 
     loadCart();
-    
 });
