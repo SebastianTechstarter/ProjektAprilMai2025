@@ -87,6 +87,14 @@ $( document ).ready(() => {
         $bookInformation.css('display', 'none');
     }
 
+    function updateAfterLogin() {
+        const loginButton = $('div[button="show:login"]');
+        if (loginButton.length) {
+            loginButton.attr('button', 'show:profile');
+        }
+        $('div[login]').remove();
+    }
+
     function handleLogin() {
         const email = $('div[login] input[name="email"]').val().trim();
         const password = $('div[login] input[name="password"]').val().trim();
@@ -113,6 +121,7 @@ $( document ).ready(() => {
                 sessionStorage.setItem('user', JSON.stringify(result.user)); 
                 hideLogin();
                 loadCart();
+                updateAfterLogin();
             } else {
                 alert('Login fehlgeschlagen: ' + result.message);
             }
