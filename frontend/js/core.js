@@ -53,6 +53,9 @@ $( document ).ready(() => {
             case 'show:messages':
                 alert("Was lange währt, wird endlich geil. Bald ist es so weit!");
                 break;
+            case 'site:shopping-cart':
+                alert("Wir haben der neuen Funktion gesagt, sie soll sich beeilen. Jetzt macht sie erstmal ein Update.");
+                break;
         }
     });
 
