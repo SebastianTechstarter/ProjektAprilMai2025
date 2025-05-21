@@ -118,6 +118,10 @@ body[background="5"] {
     cursor: pointer;
 }
 
+[navigation] > [menu] > [button="show:messages"] {
+    display: none;
+}
+
 [navigation] > [menu] > [button] > [amount] {
     position: absolute;
     bottom: -3px;

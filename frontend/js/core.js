@@ -153,6 +153,7 @@ $( document ).ready(() => {
                 hideLogin();
                 loadCart();
                 updateAfterLogin();
+                $('[button="show:messages"]').css('display', 'flex');
             } else {
                 alert('Login fehlgeschlagen: ' + result.message);
             }
