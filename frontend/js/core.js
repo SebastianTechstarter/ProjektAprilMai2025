@@ -56,6 +56,9 @@ $( document ).ready(() => {
             case 'site:shopping-cart':
                 alert("Wir haben der neuen Funktion gesagt, sie soll sich beeilen. Jetzt macht sie erstmal ein Update.");
                 break;
+            case 'show:profile':
+                alert("Spoiler Alert: Die neue Funktion wird heißer als dein Lieblingsmeme.");
+                break;
         }
     });
 
