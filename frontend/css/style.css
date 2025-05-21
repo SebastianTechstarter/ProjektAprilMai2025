@@ -455,7 +455,8 @@ body[background="5"] {
 }
 
 [shopping-cart] > [form] > [list] > [element] > [text] {
-    text-wrap: nowrap;
+    width: 100%;
+    text-wrap: stable;
     display: flex;
     flex-direction: column;
 }
@@ -483,6 +484,7 @@ body[background="5"] {
     display: flex;
     gap: 6px;
     align-items: center;
+    justify-content: center;
     margin-left: 30px;
 }
 
@@ -523,7 +525,7 @@ body[background="5"] {
 /*HAUPTSEITE*/
 
 [content="main"] {
-    padding: 20px;
+    padding: 60px 20px;
     width: 100%;
     height: 100%;
     display: flex;
@@ -531,28 +533,6 @@ body[background="5"] {
     align-items: center;
     gap: 60px;
     overflow-y: scroll;
-}
-
-[content="main"] > [quick-category] {
-    width: 100%;
-    min-width: 1024px;
-    max-width: 1024px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-[content="main"] > [quick-category] > [button] {
-    position: relative;
-    padding: 6px 10px;
-    background-color: #d3d3d3;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-[content="main"] > [quick-category] > [button]:hover {
-    background-color: #a2c0ff;
 }
 
 [content="main"] > [top-list] {

@@ -11,27 +11,6 @@ $( document ).ready(() => {
     const $container =       $( '[quick-category]' );
 
     let currentUtterance = null;
-
-    const chunkSize = 8;
-    const $buttons = $container.children('div');
-    let currentIndex = 0;
-    $buttons.hide();
-
-    function showNextChunk() {
-        const $nextChunk = $buttons.slice(currentIndex, currentIndex + chunkSize);
-        $nextChunk.show();
-        currentIndex += chunkSize;
-        if (currentIndex >= $buttons.length) {
-            $( '[button="more"]' ).remove();
-        }
-    }
-
-    showNextChunk();
-
-    const $moreButton = $('<div button="more"><i class="fa fa-caret-down" aria-hidden="true"></i></div>');
-    $container.append($moreButton);
-
-    $moreButton.on('click', showNextChunk);
     
     $( '[button]' ).on( "click", function() {
         switch ($( this ).attr('button')) {
@@ -254,7 +233,7 @@ $( document ).ready(() => {
             });
 
             const addToCartBtn = alreadyInCart
-                ? `<div button disabled class="disabled">✔ Bereits im Warenkorb</div>`
+                ? `<div button disabled class="disabled">✔️ Warenkorb</div>`
                 : `<div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>`;
 
             const bookHtml = `
@@ -402,8 +381,7 @@ $( document ).ready(() => {
                     const elementHTML = `
                         <div element>
                             <div text><span>${category}</span>${title}</div>
-                            <div placeholder></div>
-                            <div price>${price}</div>
+                            <div price>${price}€</div>
                             <div menu>
                                 <input type="number" name="${uniqueId}" min="1" max="9999" value="1">
                                 <div button="delete:${uniqueId}">
@@ -422,7 +400,7 @@ $( document ).ready(() => {
                 $(this).removeAttr('button')
                     .removeAttr('book-data')
                     .addClass('disabled')
-                    .text('✔ Bereits im Warenkorb');
+                    .text('✔️ Warenkorb');
             } else {
                 alert("Fehler: " + result.message);
             }
@@ -635,8 +613,7 @@ $( document ).ready(() => {
                 const elementHTML = `
                     <div element>
                         <div text><span>${category}</span>${title}</div>
-                        <div placeholder></div>
-                        <div price>${price}</div>
+                        <div price>${price}€</div>
                         <div menu>
                             <input type="number" name="${uniqueId}" min="1" max="9999" value="${quantity}">
                             <div button="delete:${uniqueId}">
