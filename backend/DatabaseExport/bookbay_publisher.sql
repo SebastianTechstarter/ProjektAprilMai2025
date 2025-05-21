@@ -28,7 +28,7 @@ CREATE TABLE `publisher` (
   `contact_info` text,
   PRIMARY KEY (`publisher_id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +37,7 @@ CREATE TABLE `publisher` (
 
 LOCK TABLES `publisher` WRITE;
 /*!40000 ALTER TABLE `publisher` DISABLE KEYS */;
-INSERT INTO `publisher` VALUES (1,'mitteldeutscherverlag','info@mitteldeutscherverlag.de'),(2,'dtv','www.dtv.de'),(3,'Klett-Cotta','www.klett-cotta.de'),(4,'Theiss','www.wbg-wissenverbindet.de'),(5,'Bassermann','www.bassermann-verlag.de'),(6,'bookbayOriginal','www.bookbay.de'),(7,'Redline Verlag','www.redline-verlag.de');
+INSERT INTO `publisher` VALUES (1,'mitteldeutscherverlag','info@mitteldeutscherverlag.de'),(2,'dtv','www.dtv.de'),(3,'Klett-Cotta','www.klett-cotta.de'),(4,'Theiss','www.wbg-wissenverbindet.de'),(5,'Bassermann','www.bassermann-verlag.de'),(6,'bookbayOriginal','www.bookbay.de'),(7,'Redline Verlag','www.redline-verlag.de'),(8,'Ullstein','www.ullstein.de'),(9,'Knaur','www.droemer-knaur.de'),(10,'Cornelsen','www.cornelsen.de'),(11,'Piper','www.piper.de');
 /*!40000 ALTER TABLE `publisher` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-15 17:40:27
+-- Dump completed on 2025-05-21  9:58:43

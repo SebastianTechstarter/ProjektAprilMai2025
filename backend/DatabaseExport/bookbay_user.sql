@@ -27,7 +27,7 @@ CREATE TABLE `user` (
   `username` varchar(50) NOT NULL,
   `password_hash` char(255) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `user_type` varchar(100) NOT NULL,
+  `user_type` varchar(20) NOT NULL,
   `payment_method` varchar(100) NOT NULL,
   `paypal_account` varchar(100) DEFAULT NULL,
   `iban` varchar(34) DEFAULT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `user` (
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,6 +45,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,'user_hl06wu','$2b$10$2qEmy4SEWLLH71OOQTFhU.FTgi9KzAEG2V.H.PhEqdykr7WV540w2','sebastianrehberg88@googlemail.com','private','iban',NULL,NULL,NULL,'2025-05-20 11:35:54');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -57,4 +58,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-15 17:40:26
+-- Dump completed on 2025-05-21  9:58:43
