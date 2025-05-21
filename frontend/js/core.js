@@ -44,6 +44,9 @@ $( document ).ready(() => {
             case 'hide:book-information':
                 hideBookInformation();
                 break;
+            case 'hide:profile':
+                hideProfile();
+                break;
         }
     });
 
@@ -324,6 +327,7 @@ $( document ).ready(() => {
                     <div menu>
                         ${addToCartBtn}
                         <div button="addto:library">+ Bibliothek</div>
+                        <div button="addto:wishlist">+ Wunschliste</div>
                     </div>
                 </div>
                 <div book-description>
