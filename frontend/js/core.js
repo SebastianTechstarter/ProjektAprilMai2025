@@ -123,6 +123,7 @@ $( document ).ready(() => {
             }
             $('div[login]').remove();
             $('div[register]').remove();
+            $('[button="show:messages"]').css('display', 'flex');
         }
     }
 
