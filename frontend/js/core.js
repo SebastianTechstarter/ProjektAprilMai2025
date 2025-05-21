@@ -89,6 +89,16 @@ $( document ).ready(() => {
         $bookInformation.css('display', 'none');
     }
 
+    function showProfile() {
+        $('[content="main"] > [top-list]').hide();
+        $('[content="main"] > [profile]').css('display', 'flex');
+    }
+
+    function hideProfile() {
+        $('[content="main"] > [top-list]').css('display', 'flex');
+        $('[content="main"] > [profile]').hide();
+    }
+
     function updateAfterLogin() {
         const storedUser = sessionStorage.getItem('user');
         if (storedUser) {
@@ -268,6 +278,8 @@ $( document ).ready(() => {
     });
 
     $('[button="login"]').on("click", handleLogin);
+
+    $('[button="show:profile"]').on("click", showProfile);
 
     $(document).on('click', '[button="show:book-information"]', async function () {
         const bookId = $(this).attr('book-cover');
