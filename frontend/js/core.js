@@ -87,7 +87,38 @@ $( document ).ready(() => {
         $bookInformation.css('display', 'none');
     }
 
-    //------------------------------------------------------------------------
+    function handleLogin() {
+        const email = $('div[login] input[name="email"]').val().trim();
+        const password = $('div[login] input[name="password"]').val().trim();
+
+        if (!email || !password) {
+            alert('Bitte füllen Sie alle Felder aus.');
+            return;
+        }
+
+        const loginData = {
+            action: 'login',
+            email: email,
+            password: password
+        };
+
+        fetch(api_url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(loginData)
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                sessionStorage.setItem('user', JSON.stringify(result.user)); 
+                hideLogin();
+                loadCart();
+            } else {
+                alert('Login fehlgeschlagen: ' + result.message);
+            }
+        })
+        .catch(err => alert('Fehler: ' + err.message));
+    }
 
     function parsePrice(text) {
         return parseFloat(text.replace(',', '.').replace('€', '').trim());
@@ -113,6 +144,63 @@ $( document ).ready(() => {
         $('[button="show:shopping-cart"] [amount]').text(totalCount);
     }
 
+    function generateRandomUsername() {
+        const randomStr = Math.random().toString(36).substring(2, 8); // z. B. '5f3a9c'
+        return 'user_' + randomStr;
+    }
+
+    async function loadCart() {
+        const storedUser = sessionStorage.getItem('user');
+        const $cartList = $('div[shopping-cart] div[list]');
+        $cartList.empty();
+        if (!storedUser) {
+            $cartList.append(`<div element><div text>Kein Benutzer eingeloggt – kein Warenkorb verfügbar.</div></div>`);
+            return;
+        }
+        const user = JSON.parse(storedUser);
+        try {
+            const res = await fetch(api_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'get_cart',
+                    user_id: user.id
+                })
+            });
+            const result = await res.json();
+            if (!result.success || !Array.isArray(result.cart) || result.cart.length === 0) {
+                $cartList.append(`<div element><div text>Warenkorb ist leer.</div></div>`);
+                return;
+            }
+            for (const item of result.cart) {
+                const uniqueId = 'article_' + item.book_id;
+                const category = item.category_name || 'Unbekannt';
+                const title = item.title || '';
+                const price = parseFloat(item.price).toFixed(2);
+                const quantity = item.quantity || 1;
+                const elementHTML = `
+                    <div element>
+                        <div text><span>${category}</span>${title}</div>
+                        <div price>${price}€</div>
+                        <div menu>
+                            <input type="number" name="${uniqueId}" min="1" max="9999" value="${quantity}">
+                            <div button="delete:${uniqueId}">
+                                <i class="fa fa-trash-o" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $cartList.append(elementHTML);
+            }
+            updateCart();
+        } catch (err) {
+            console.error("Fehler beim Laden des Warenkorbs:", err);
+            $cartList.append(`<div element><div text>Fehler beim Laden des Warenkorbs.</div></div>`);
+        }
+    }
+
     updateCart();
 
     $('[list]').on('change', 'input[type="number"]', function () {
@@ -123,13 +211,6 @@ $( document ).ready(() => {
         $(this).closest('[element]').remove();
         updateCart();
     });
-
-    //---------------------------------------------------------
-
-    function generateRandomUsername() {
-        const randomStr = Math.random().toString(36).substring(2, 8); // z. B. '5f3a9c'
-        return 'user_' + randomStr;
-    }
 
     $('[button="register:private"], [button="register:company"]').on("click", function (event) {
         const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
@@ -170,39 +251,6 @@ $( document ).ready(() => {
             alert(err.message);
         });
     });
-
-    function handleLogin() {
-        const email = $('div[login] input[name="email"]').val().trim();
-        const password = $('div[login] input[name="password"]').val().trim();
-
-        if (!email || !password) {
-            alert('Bitte füllen Sie alle Felder aus.');
-            return;
-        }
-
-        const loginData = {
-            action: 'login',
-            email: email,
-            password: password
-        };
-
-        fetch(api_url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(loginData)
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (result.success) {
-                sessionStorage.setItem('user', JSON.stringify(result.user)); 
-                hideLogin();
-                loadCart();
-            } else {
-                alert('Login fehlgeschlagen: ' + result.message);
-            }
-        })
-        .catch(err => alert('Fehler: ' + err.message));
-    }
 
     $('[button="login"]').on("click", handleLogin);
 
@@ -316,24 +364,6 @@ $( document ).ready(() => {
     $(document).on('click', '[button="hide:book-information"]', function () {
         $('[book-information]').hide();
         $('[book-information] > [form]').empty();
-    });
-
-    $('input[name="search"]').on('input', function () {
-        const searchTerm = $(this).val().toLowerCase();
-
-        $('div[article]').each(function () {
-            const $article = $(this);
-            const author = ($article.attr('author') || '').toLowerCase();
-            const category = $article.find('div[category]').text().toLowerCase();
-            const title = ($article.attr('title') || '').toLowerCase();
-            const isbn = ($article.attr('isbn') || '').toLowerCase();
-            const publisher = ($article.attr('publisher') || '').toLowerCase();
-            const publication_year = ($article.attr('publication-year') || '').toLowerCase();
-            const matches = [author, category, title, isbn, publisher, publication_year].some(field =>
-                field.includes(searchTerm)
-            );
-            $article.toggle(matches);
-        });
     });
 
     $(document).on('click', '[button^="addto:shopping-cart"]', async function () {
@@ -468,6 +498,24 @@ $( document ).ready(() => {
         }
     });
 
+    $('input[name="search"]').on('input', function () {
+        const searchTerm = $(this).val().toLowerCase();
+
+        $('div[article]').each(function () {
+            const $article = $(this);
+            const author = ($article.attr('author') || '').toLowerCase();
+            const category = $article.find('div[category]').text().toLowerCase();
+            const title = ($article.attr('title') || '').toLowerCase();
+            const isbn = ($article.attr('isbn') || '').toLowerCase();
+            const publisher = ($article.attr('publisher') || '').toLowerCase();
+            const publication_year = ($article.attr('publication-year') || '').toLowerCase();
+            const matches = [author, category, title, isbn, publisher, publication_year].some(field =>
+                field.includes(searchTerm)
+            );
+            $article.toggle(matches);
+        });
+    });
+
     (async () => {
         try {
             const [booksRes, categoriesRes, publishersRes] = await Promise.all([
@@ -524,58 +572,6 @@ $( document ).ready(() => {
             console.error("Fehler beim Laden der Daten:", err);
         }
     })();
-
-    async function loadCart() {
-        const storedUser = sessionStorage.getItem('user');
-        const $cartList = $('div[shopping-cart] div[list]');
-        $cartList.empty();
-        if (!storedUser) {
-            $cartList.append(`<div element><div text>Kein Benutzer eingeloggt – kein Warenkorb verfügbar.</div></div>`);
-            return;
-        }
-        const user = JSON.parse(storedUser);
-        try {
-            const res = await fetch(api_url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'get_cart',
-                    user_id: user.id
-                })
-            });
-            const result = await res.json();
-            if (!result.success || !Array.isArray(result.cart) || result.cart.length === 0) {
-                $cartList.append(`<div element><div text>Warenkorb ist leer.</div></div>`);
-                return;
-            }
-            for (const item of result.cart) {
-                const uniqueId = 'article_' + item.book_id;
-                const category = item.category_name || 'Unbekannt';
-                const title = item.title || '';
-                const price = parseFloat(item.price).toFixed(2);
-                const quantity = item.quantity || 1;
-                const elementHTML = `
-                    <div element>
-                        <div text><span>${category}</span>${title}</div>
-                        <div price>${price}€</div>
-                        <div menu>
-                            <input type="number" name="${uniqueId}" min="1" max="9999" value="${quantity}">
-                            <div button="delete:${uniqueId}">
-                                <i class="fa fa-trash-o" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                $cartList.append(elementHTML);
-            }
-            updateCart();
-        } catch (err) {
-            console.error("Fehler beim Laden des Warenkorbs:", err);
-            $cartList.append(`<div element><div text>Fehler beim Laden des Warenkorbs.</div></div>`);
-        }
-    }
 
     loadCart();
     
