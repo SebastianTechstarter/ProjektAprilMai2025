@@ -3,12 +3,10 @@ $( document ).ready(() => {
     let api_url = 'https://marcel-dorr.de/project-swm/api/';
 
     const $body =            $( 'body' );
-    const $main =            $( '[content="main"]' );
     const $login =           $( '[login]' );
     const $register =        $( '[register]' );
     const $shoppingCart =    $( '[shopping-cart]' );
     const $bookInformation = $( '[book-information]' );
-    const $container =       $( '[quick-category]' );
 
     let currentUtterance = null;
     
@@ -98,7 +96,6 @@ $( document ).ready(() => {
     function updateCart() {
         let totalPrice = 0;
         let totalCount = 0;
-
         $('[shopping-cart] > [form] > [list] > [element]').each(function () {
             let quantity = parseInt($(this).find('input[type="number"]').val(), 10);
             let priceText = $(this).find('[price]').text();
@@ -138,12 +135,10 @@ $( document ).ready(() => {
         const userType = $(event.currentTarget).is('[button="register:private"]') ? 'private' : 'company';
         let password1 = $('input[name="password-register-1"]').val();
         let password2 = $('input[name="password-register-2"]').val();
-
         if (password1 !== password2) {
             alert("Passwörter stimmen nicht überein.");
             return;
         }
-
         const data = {
             action: 'register',
             username: generateRandomUsername(),
@@ -151,7 +146,6 @@ $( document ).ready(() => {
             password: password1,
             user_type: userType
         };
-
         fetch(api_url, {
             method: 'POST',
             headers: {
@@ -183,7 +177,6 @@ $( document ).ready(() => {
             email: $('div[login] input[name="email"]').val(),
             password: $('div[login] input[name="password"]').val()
         };
-
         fetch(api_url, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -205,37 +198,29 @@ $( document ).ready(() => {
     $(document).on('click', '[button="show:book-information"]', async function () {
         const bookId = $(this).attr('book-cover');
         const bookImage = String(bookId).padStart(3, '0');
-
         try {
             const res = await fetch(api_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'book', book_id: bookId })
             });
-
             if (!res.ok) throw new Error("Fehler beim Laden des Buchs");
             const book = await res.json();
-
             const categoryName = book.category_name || "Unbekannt";
             const price = parseFloat(book.price).toFixed(2);
             const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
-
-            // ✅ Titel-Text prüfen, ob Buch schon im Warenkorb ist
             const bookTitle = book.title.trim();
             let alreadyInCart = false;
-
             $('[shopping-cart] [element] [text]').each(function () {
-                const fullText = $(this).text().trim(); // z. B. "RomanDer kleine Prinz"
+                const fullText = $(this).text().trim();
                 if (fullText.includes(bookTitle)) {
                     alreadyInCart = true;
-                    return false; // break loop
+                    return false;
                 }
             });
-
             const addToCartBtn = alreadyInCart
                 ? `<div button disabled class="disabled">✔️ Warenkorb</div>`
                 : `<div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>`;
-
             const bookHtml = `
                 <div button="hide:book-information">
                     <i class="fa fa-times" aria-hidden="true"></i>
@@ -265,10 +250,8 @@ $( document ).ready(() => {
                     </div>
                 </div>
             `;
-
             $('[book-information] > [form]').html(bookHtml);
             $('[book-information]').css('display', 'flex');
-
             $('[button]').on("click", function () {
                 switch ($(this).attr('button')) {
                     case 'read:text':
@@ -335,11 +318,9 @@ $( document ).ready(() => {
             const isbn = ($article.attr('isbn') || '').toLowerCase();
             const publisher = ($article.attr('publisher') || '').toLowerCase();
             const publication_year = ($article.attr('publication-year') || '').toLowerCase();
-
             const matches = [author, category, title, isbn, publisher, publication_year].some(field =>
                 field.includes(searchTerm)
             );
-
             $article.toggle(matches);
         });
     });
@@ -347,15 +328,12 @@ $( document ).ready(() => {
     $(document).on('click', '[button^="addto:shopping-cart"]', async function () {
         const bookData = $(this).attr('book-data');
         if (!bookData) return;
-
         const storedUser = sessionStorage.getItem('user');
         if (!storedUser) return;
-
         const user = JSON.parse(storedUser);
         const [bookId, title, category, price] = bookData.split(';');
         const quantity = 1;
         const uniqueId = 'article_' + bookId;
-
         try {
             const res = await fetch(api_url, {
                 method: 'POST',
@@ -369,9 +347,7 @@ $( document ).ready(() => {
                     quantity: quantity
                 })
             });
-
             const result = await res.json();
-
             if (result.success) {
                 const $existing = $(`input[name="${uniqueId}"]`);
                 if ($existing.length) {
@@ -393,10 +369,7 @@ $( document ).ready(() => {
                     $('div[shopping-cart] div[list]').append(elementHTML);
                     updateCart();
                 }
-
                 loadCart();
-
-                // ⬇️ HIER wird der Button deaktiviert
                 $(this).removeAttr('button')
                     .removeAttr('book-data')
                     .addClass('disabled')
@@ -404,7 +377,6 @@ $( document ).ready(() => {
             } else {
                 alert("Fehler: " + result.message);
             }
-
         } catch (err) {
             console.error("Fehler beim Hinzufügen zum Warenkorb:", err);
         }
@@ -416,15 +388,11 @@ $( document ).ready(() => {
             alert("Du bist nicht eingeloggt.");
             return;
         }
-
         const user = JSON.parse(storedUser);
-
         const buttonAttr = $(this).attr('button'); // z.B. delete:article_42
         const match = buttonAttr.match(/^delete:article_(\d+)$/);
         if (!match) return;
-
         const bookId = parseInt(match[1], 10);
-
         try {
             const res = await fetch(api_url, {
                 method: 'POST',
@@ -435,16 +403,13 @@ $( document ).ready(() => {
                     book_id: bookId
                 })
             });
-
             const result = await res.json();
-
             if (result.success) {
                 $(this).closest('[element]').remove();
                 updateCart();
             } else {
                 alert("Fehler beim Entfernen: " + result.message);
             }
-
         } catch (err) {
             console.error("Fehler beim Entfernen des Artikels:", err);
             alert("Verbindung zur API fehlgeschlagen.");
@@ -457,23 +422,18 @@ $( document ).ready(() => {
             alert("Du bist nicht eingeloggt.");
             return;
         }
-
         const user = JSON.parse(storedUser);
-
         const $input = $(this);
         const nameAttr = $input.attr('name'); // z.B. article_42
         const match = nameAttr.match(/^article_(\d+)$/);
         if (!match) return;
-
         const bookId = parseInt(match[1], 10);
         const quantity = parseInt($input.val(), 10);
-
         if (isNaN(quantity) || quantity < 1) {
             alert("Ungültige Menge.");
             $input.val(1);
             return;
         }
-
         try {
             const res = await fetch(api_url, {
                 method: 'POST',
@@ -485,15 +445,12 @@ $( document ).ready(() => {
                     quantity: quantity
                 })
             });
-
             const result = await res.json();
-
             if (!result.success) {
                 alert("Fehler beim Aktualisieren: " + result.message);
             } else {
                 updateCart(); // Optional: Gesamtpreis neu berechnen
             }
-
         } catch (err) {
             console.error("Fehler beim Aktualisieren der Menge:", err);
             alert("Serverfehler bei der Aktualisierung.");
@@ -520,53 +477,39 @@ $( document ).ready(() => {
                     body: JSON.stringify({ action: 'publishers' })
                 })
             ]);
-
             if (!booksRes.ok || !categoriesRes.ok || !publishersRes.ok) {
                 throw new Error("Ein oder mehrere API-Aufrufe sind fehlgeschlagen.");
             }
-
             const books = await booksRes.json();
             const categories = await categoriesRes.json();
             const publishers = await publishersRes.json();
-
-            // Caches vorbereiten
             const categoryCache = {};
             const publisherCache = {};
-
-            // Caches füllen
             for (const cat of categories) {
                 categoryCache[cat.category_id] = cat.name;
             }
             for (const pub of publishers) {
                 publisherCache[pub.publisher_id] = pub.name;
             }
-
-            // Buchliste rendern
             const $listContainer = $('[content="main"] > [top-list] > [list]');
             $listContainer.empty();
-
             for (const book of books) {
                 const categoryName = categoryCache[book.category_id] || "Unbekannt";
                 const publisherName = publisherCache[book.publisher_id] || "";
-
                 const bookId = String(book.book_id).padStart(3, '0');
                 const randomRate = (Math.random() * 4 + 1).toFixed(1);
-
                 const $bookElement = $(`
                     <div article button="show:book-information" book-cover="${bookId}" isbn="${book.isbn}" author="${book.author}" publication-year="${book.publication_year}" publisher="${publisherName}" title="${book.title}">
                         <div category>${categoryName}</div>
                         <div rate>${randomRate}❤️</div>
                     </div>
                 `);
-
                 $listContainer.append($bookElement);
             }
-
             $('[article]').each(function () {
                 const bookCover = $(this).attr('book-cover');
                 $(this).css('background-image', 'url(./images/book_' + bookCover + '/front.png)');
             });
-
         } catch (err) {
             console.error("Fehler beim Laden der Daten:", err);
         }
@@ -576,14 +519,11 @@ $( document ).ready(() => {
         const storedUser = sessionStorage.getItem('user');
         const $cartList = $('div[shopping-cart] div[list]');
         $cartList.empty();
-
         if (!storedUser) {
             $cartList.append(`<div element><div text>Kein Benutzer eingeloggt – kein Warenkorb verfügbar.</div></div>`);
             return;
         }
-
         const user = JSON.parse(storedUser);
-
         try {
             const res = await fetch(api_url, {
                 method: 'POST',
@@ -595,21 +535,17 @@ $( document ).ready(() => {
                     user_id: user.id
                 })
             });
-
             const result = await res.json();
-
             if (!result.success || !Array.isArray(result.cart) || result.cart.length === 0) {
                 $cartList.append(`<div element><div text>Warenkorb ist leer.</div></div>`);
                 return;
             }
-
             for (const item of result.cart) {
                 const uniqueId = 'article_' + item.book_id;
                 const category = item.category_name || 'Unbekannt';
                 const title = item.title || '';
                 const price = parseFloat(item.price).toFixed(2);
                 const quantity = item.quantity || 1;
-
                 const elementHTML = `
                     <div element>
                         <div text><span>${category}</span>${title}</div>
@@ -624,9 +560,7 @@ $( document ).ready(() => {
                 `;
                 $cartList.append(elementHTML);
             }
-
             updateCart();
-
         } catch (err) {
             console.error("Fehler beim Laden des Warenkorbs:", err);
             $cartList.append(`<div element><div text>Fehler beim Laden des Warenkorbs.</div></div>`);
