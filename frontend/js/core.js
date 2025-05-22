@@ -618,8 +618,11 @@ $( document ).ready(() => {
     $(document).on('click', '[button="show:library"], [button="show:wishlist"]', async function () {
         const user = JSON.parse(sessionStorage.getItem('user'));
         if (!user?.id) return;
-        const action = $(this).attr('button') === 'show:library' ? 'get_library_books' : 'get_wishlist_books';
-        const title = action === 'get_library_books' ? '📚 Deine Bibliothek' : '💖 Deine Wunschliste';
+
+        const listType = $(this).attr('button') === 'show:library' ? 'library' : 'wishlist';
+        const action = listType === 'library' ? 'get_library_books' : 'get_wishlist_books';
+        const title = listType === 'library' ? '📚 Deine Bibliothek' : '💖 Deine Wunschliste';
+
         try {
             const res = await fetch(api_url, {
                 method: 'POST',
@@ -629,30 +632,66 @@ $( document ).ready(() => {
                     user_id: user.id
                 })
             });
+
             if (!res.ok) throw new Error("Fehler beim Abrufen der Daten");
             const data = await res.json();
             if (!data.success) throw new Error("Fehlerhafte Antwort von der API");
+
             const books = data.books;
             let html = `<div element><h2>${title}</h2></div>`;
+
             if (books.length === 0) {
                 html += `<div element><p>Keine Bücher gefunden.</p></div>`;
             } else {
                 books.forEach(book => {
                     html += `
-                        <div element>
+                        <div element data-book-id="${book.id}">
                             <strong>${book.title}</strong><br>
                             von ${book.author || 'Unbekannt'}<br>
                             Jahr: ${book.publication_year || '–'}<br>
-                            Kategorie: ${book.category_name || '–'}
+                            Kategorie: ${book.category_name || '–'}<br>
+                            <button class="remove-book" data-type="${listType}" data-id="${book.id}">🗑️ Entfernen</button>
                             <hr>
                         </div>
                     `;
                 });
             }
+
             $('div[profile] > div[content]').html(html);
+
         } catch (err) {
             console.error("Fehler:", err);
             $('div[profile] > div[content]').html(`<div element><p>Ein Fehler ist aufgetreten: ${err.message}</p></div>`);
+        }
+    });
+
+    $(document).on('click', '.remove-book', async function () {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user?.id) return;
+
+        const bookId = $(this).data('id');
+        const listType = $(this).data('type');
+        const action = listType === 'library' ? 'remove_from_library' : 'remove_from_wishlist';
+
+        try {
+            const res = await fetch(api_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: action,
+                    user_id: user.id,
+                    book_id: bookId
+                })
+            });
+
+            const data = await res.json();
+            if (!data.success) throw new Error("Konnte das Buch nicht entfernen");
+
+            // 🔄 Liste neu laden
+            $(`[button="show:${listType}"]`).trigger('click');
+
+        } catch (err) {
+            alert("Fehler beim Entfernen: " + err.message);
         }
     });
 
