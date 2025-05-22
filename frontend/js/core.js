@@ -59,6 +59,52 @@ $( document ).ready(() => {
             case 'show:profile-':
                 alert("Spoiler Alert: Die neue Funktion wird heißer als dein Lieblingsmeme.");
                 break;
+            case 'addto:library':
+                if (!sessionStorage.getItem('user')) return alert('Nicht angemeldet.');
+                const libraryUser = JSON.parse(sessionStorage.getItem('user'));
+                try {
+                    const res = fetch(api_url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'add_to_library',
+                            user_id: libraryUser.id,
+                            book_id: bookId
+                        })
+                    });
+                    const result = res.json();
+                    if (result.success) {
+                        alert("Zur Bibliothek hinzugefügt.");
+                    } else {
+                        alert("Fehler: " + result.message);
+                    }
+                } catch (err) {
+                    console.error("Fehler beim Hinzufügen zur Bibliothek:", err);
+                }
+                break;
+            case 'addto:wishlist':
+                if (!sessionStorage.getItem('user')) return alert('Nicht angemeldet.');
+                const wishlistUser = JSON.parse(sessionStorage.getItem('user'));
+                try {
+                    const res = fetch(api_url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'add_to_wishlist',
+                            user_id: wishlistUser.id,
+                            book_id: bookId
+                        })
+                    });
+                    const result = res.json();
+                    if (result.success) {
+                        alert("Zur Wunschliste hinzugefügt.");
+                    } else {
+                        alert("Fehler: " + result.message);
+                    }
+                } catch (err) {
+                    console.error("Fehler beim Hinzufügen zur Wunschliste:", err);
+                }
+                break;
         }
     });
 
@@ -301,18 +347,27 @@ $( document ).ready(() => {
     $(document).on('click', '[button="show:book-information"]', async function () {
         const bookId = $(this).attr('book-cover');
         const bookImage = String(bookId).padStart(3, '0');
+        const user = JSON.parse(sessionStorage.getItem('user'));
+
         try {
             const res = await fetch(api_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'book', book_id: bookId })
+                body: JSON.stringify({
+                    action: 'book',
+                    book_id: bookId,
+                    user_id: user.id
+                })
             });
+
             if (!res.ok) throw new Error("Fehler beim Laden des Buchs");
             const book = await res.json();
+
             const categoryName = book.category_name || "Unbekannt";
             const price = parseFloat(book.price).toFixed(2);
             const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
             const bookTitle = book.title.trim();
+
             let alreadyInCart = false;
             $('[shopping-cart] [element] [text]').each(function () {
                 const fullText = $(this).text().trim();
@@ -321,9 +376,22 @@ $( document ).ready(() => {
                     return false;
                 }
             });
+
+            const inLibrary = book.in_library === true;
+            const inWishlist = book.in_wishlist === true;
+
             const addToCartBtn = alreadyInCart
                 ? `<div button disabled class="disabled">✔️ Warenkorb</div>`
                 : `<div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>`;
+
+            const libraryBtn = inLibrary
+                ? `<div button disabled class="disabled">✔️ Bibliothek</div>`
+                : `<div button="addto:library" book-data="${book.book_id};${user.id}">+ Bibliothek</div>`;
+
+            const wishlistBtn = inWishlist
+                ? `<div button disabled class="disabled">✔️ Wunschliste</div>`
+                : `<div button="addto:wishlist" book-data="${book.book_id};${user.id}">+ Wunschliste</div>`;
+
             const bookHtml = `
                 <div button="hide:book-information">
                     <i class="fa fa-times" aria-hidden="true"></i>
@@ -340,8 +408,8 @@ $( document ).ready(() => {
                     <div element>Preis:<span>${price}€ ${oldPrice}</span></div>
                     <div menu>
                         ${addToCartBtn}
-                        <div button="addto:library">+ Bibliothek</div>
-                        <div button="addto:wishlist">+ Wunschliste</div>
+                        ${libraryBtn}
+                        ${wishlistBtn}
                     </div>
                 </div>
                 <div book-description>
@@ -356,48 +424,39 @@ $( document ).ready(() => {
             `;
             $('[book-information] > [form]').html(bookHtml);
             $('[book-information]').css('display', 'flex');
+
             $('[button]').on("click", function () {
                 switch ($(this).attr('button')) {
                     case 'read:text':
                         const text = $('[book-description] > span').text().trim();
                         function speak(text) {
-                            if (speechSynthesis.speaking) {
-                                speechSynthesis.cancel();
-                            }
+                            if (speechSynthesis.speaking) speechSynthesis.cancel();
                             currentUtterance = new SpeechSynthesisUtterance(text);
                             currentUtterance.lang = 'de-DE';
                             const voices = speechSynthesis.getVoices();
-                            const preferredVoice = voices.find(voice =>
-                                voice.lang === 'de-DE' && /Google|Microsoft|Anna/.test(voice.name)
-                            );
-                            if (preferredVoice) {
-                                currentUtterance.voice = preferredVoice;
-                            }
+                            const preferredVoice = voices.find(v =>
+                                v.lang === 'de-DE' && /Google|Microsoft|Anna/.test(v.name));
+                            if (preferredVoice) currentUtterance.voice = preferredVoice;
                             speechSynthesis.speak(currentUtterance);
                         }
 
                         if (speechSynthesis.getVoices().length > 0) {
                             speak(text);
                         } else {
-                            speechSynthesis.onvoiceschanged = () => {
-                                speak(text);
-                            };
+                            speechSynthesis.onvoiceschanged = () => speak(text);
                         }
                         break;
+
                     case 'pause:text':
-                        if (speechSynthesis.speaking && !speechSynthesis.paused) {
-                            speechSynthesis.pause();
-                        }
+                        if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.pause();
                         break;
+
                     case 'resume:text':
-                        if (speechSynthesis.paused) {
-                            speechSynthesis.resume();
-                        }
+                        if (speechSynthesis.paused) speechSynthesis.resume();
                         break;
+
                     case 'stop:text':
-                        if (speechSynthesis.speaking) {
-                            speechSynthesis.cancel();
-                        }
+                        if (speechSynthesis.speaking) speechSynthesis.cancel();
                         break;
                 }
             });
@@ -510,7 +569,7 @@ $( document ).ready(() => {
         }
         const user = JSON.parse(storedUser);
         const $input = $(this);
-        const nameAttr = $input.attr('name'); // z.B. article_42
+        const nameAttr = $input.attr('name');
         const match = nameAttr.match(/^article_(\d+)$/);
         if (!match) return;
         const bookId = parseInt(match[1], 10);
@@ -535,7 +594,7 @@ $( document ).ready(() => {
             if (!result.success) {
                 alert("Fehler beim Aktualisieren: " + result.message);
             } else {
-                updateCart(); // Optional: Gesamtpreis neu berechnen
+                updateCart();
             }
         } catch (err) {
             console.error("Fehler beim Aktualisieren der Menge:", err);
