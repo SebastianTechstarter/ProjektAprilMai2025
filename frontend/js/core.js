@@ -11,56 +11,6 @@ $( document ).ready(() => {
     let currentUtterance = null;
 
     updateAfterLogin();
-    
-    $( '[button]' ).on( "click", function() {
-        switch ($( this ).attr('button')) {
-            case 'switch:background':
-                switchBackground($body.attr('background'));
-                break;
-            case 'show:login':
-                showLogin();
-                break;
-            case 'hide:login':
-                hideLogin();
-                break;
-            case 'show:shopping-cart':
-                showShoppingCart();
-                break;
-            case 'hide:shopping-cart':
-                hideShoppingCart();
-                break;
-            case 'show:register':
-                hideLogin();
-                showRegister();
-                break;
-            case 'hide:register':
-                hideRegister();
-                break;
-            case 'show:book-information':
-                showBookInformation();
-                $book_id = $( this ).attr('book-cover');
-                console.log($book_id);
-                break;
-            case 'hide:book-information':
-                hideBookInformation();
-                break;
-            case 'hide:profile':
-                hideProfile();
-                break;
-            case 'show:my-shop':
-                alert("Eine neue Funktion steht in den Startlöchern – sie kann alles, außer Kaffee kochen. (Noch!)");
-                break;
-            case 'show:messages':
-                alert("Was lange währt, wird endlich geil. Bald ist es so weit!");
-                break;
-            case 'site:shopping-cart':
-                alert("Wir haben der neuen Funktion gesagt, sie soll sich beeilen. Jetzt macht sie erstmal ein Update.");
-                break;
-            case 'show:profile-':
-                alert("Spoiler Alert: Die neue Funktion wird heißer als dein Lieblingsmeme.");
-                break;
-        }
-    });
 
     function switchBackground($id) {
         $random = Math.floor((Math.random() * 5) + 1);
@@ -302,6 +252,7 @@ $( document ).ready(() => {
         const bookId = $(this).attr('book-cover');
         const bookImage = String(bookId).padStart(3, '0');
         const user = JSON.parse(sessionStorage.getItem('user'));
+        
         try {
             const bookRes = await fetch(api_url, {
                 method: 'POST',
@@ -309,54 +260,76 @@ $( document ).ready(() => {
                 body: JSON.stringify({
                     action: 'book',
                     book_id: bookId,
-                    user_id: user.id
+                    user_id: user?.id || null
                 })
             });
+
             if (!bookRes.ok) throw new Error("Fehler beim Laden des Buchs");
             const book = await bookRes.json();
-            const libRes = await fetch(api_url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'library',
-                    user_id: user.id,
-                    book_id: bookId
-                })
-            });
-            const libCheck = await libRes.json();
-            const inLibrary = libCheck.success === true;
-            const wishRes = await fetch(api_url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'wishlist',
-                    user_id: user.id,
-                    book_id: bookId
-                })
-            });
-            const wishCheck = await wishRes.json();
-            const inWishlist = wishCheck.success === true;
+
+            let inLibrary = false;
+            let inWishlist = false;
+
+            if (user) {
+                const [libRes, wishRes] = await Promise.all([
+                    fetch(api_url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'library',
+                            user_id: user.id,
+                            book_id: bookId
+                        })
+                    }),
+                    fetch(api_url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'wishlist',
+                            user_id: user.id,
+                            book_id: bookId
+                        })
+                    })
+                ]);
+
+                const libCheck = await libRes.json();
+                const wishCheck = await wishRes.json();
+
+                inLibrary = libCheck.success === true;
+                inWishlist = wishCheck.success === true;
+            }
+
             const categoryName = book.category_name || "Unbekannt";
             const price = parseFloat(book.price).toFixed(2);
             const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
             const bookTitle = book.title.trim();
+
             let alreadyInCart = false;
             $('[shopping-cart] [element] [text]').each(function () {
-                const fullText = $(this).text().trim();
-                if (fullText.includes(bookTitle)) {
+                if ($(this).text().trim().includes(bookTitle)) {
                     alreadyInCart = true;
                     return false;
                 }
             });
-            const addToCartBtn = alreadyInCart
-                ? `<div button disabled class="disabled">✔️ Warenkorb</div>`
-                : `<div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>`;
-            const libraryBtn = inLibrary
-                ? `<div button disabled class="disabled">✔️ Bibliothek</div>`
-                : `<div button="addto:library" book-data="${book.book_id}">+ Bibliothek</div>`;
-            const wishlistBtn = inWishlist
-                ? `<div button disabled class="disabled">✔️ Wunschliste</div>`
-                : `<div button="addto:wishlist" book-data="${book.book_id}">+ Wunschliste</div>`;
+
+            const addToCartBtn = !user
+                ? `<div button="trigger:login-for-cart">+ Warenkorb</div>`
+                : (alreadyInCart
+                    ? `<div button disabled class="disabled">✔️ Warenkorb</div>`
+                    : `<div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>`);
+
+            const libraryBtn = user
+                ? (inLibrary
+                    ? `<div button disabled class="disabled">✔️ Bibliothek</div>`
+                    : `<div button="addto:library" book-data="${book.book_id}">+ Bibliothek</div>`)
+                : "";
+
+            const wishlistBtn = user
+                ? (inWishlist
+                    ? `<div button disabled class="disabled">✔️ Wunschliste</div>`
+                    : `<div button="addto:wishlist" book-data="${book.book_id}">+ Wunschliste</div>`)
+                : "";
+
             const bookHtml = `
                 <div button="hide:book-information">
                     <i class="fa fa-times" aria-hidden="true"></i>
@@ -387,8 +360,10 @@ $( document ).ready(() => {
                     </div>
                 </div>
             `;
+
             $('[book-information] > [form]').html(bookHtml);
             $('[book-information]').css('display', 'flex');
+
             $('[button]').on("click", function () {
                 switch ($(this).attr('button')) {
                     case 'read:text':
@@ -409,7 +384,6 @@ $( document ).ready(() => {
                             speechSynthesis.onvoiceschanged = () => speak(text);
                         }
                         break;
-
                     case 'pause:text':
                         if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.pause();
                         break;
@@ -645,12 +619,12 @@ $( document ).ready(() => {
             } else {
                 books.forEach(book => {
                     html += `
-                        <div element data-book-id="${book.id}">
+                        <div element data-book-id="${book.book_id}">
                             <strong>${book.title}</strong><br>
                             von ${book.author || 'Unbekannt'}<br>
                             Jahr: ${book.publication_year || '–'}<br>
                             Kategorie: ${book.category_name || '–'}<br>
-                            <div button="delete" data-type="${listType}" data-id="${book.id}">🗑️ Entfernen</div>
+                            <div button="delete" data-type="${listType}" data-id="${book.book_id}">🗑️ Entfernen</div>
                             <hr>
                         </div>
                     `;
@@ -686,7 +660,6 @@ $( document ).ready(() => {
 
             const data = await res.json();
             if (!data.success) throw new Error("Konnte das Buch nicht entfernen");
-
             $(`[button="show:${listType}"]`).trigger('click');
 
         } catch (err) {
@@ -750,6 +723,59 @@ $( document ).ready(() => {
             console.error("Fehler beim Laden der Daten:", err);
         }
     })();
+
+        $( '[button]' ).on( "click", function() {
+        switch ($( this ).attr('button')) {
+            case 'switch:background':
+                switchBackground($body.attr('background'));
+                break;
+            case 'show:login':
+                showLogin();
+                break;
+            case 'hide:login':
+                hideLogin();
+                break;
+            case 'show:shopping-cart':
+                showShoppingCart();
+                break;
+            case 'hide:shopping-cart':
+                hideShoppingCart();
+                break;
+            case 'show:register':
+                hideLogin();
+                showRegister();
+                break;
+            case 'hide:register':
+                hideRegister();
+                break;
+            case 'show:book-information':
+                showBookInformation();
+                $book_id = $( this ).attr('book-cover');
+                console.log($book_id);
+                break;
+            case 'hide:book-information':
+                hideBookInformation();
+                break;
+            case 'hide:profile':
+                hideProfile();
+                break;
+            case 'show:my-shop':
+                alert("Eine neue Funktion steht in den Startlöchern – sie kann alles, außer Kaffee kochen. (Noch!)");
+                break;
+            case 'show:messages':
+                alert("Was lange währt, wird endlich geil. Bald ist es so weit!");
+                break;
+            case 'site:shopping-cart':
+                alert("Wir haben der neuen Funktion gesagt, sie soll sich beeilen. Jetzt macht sie erstmal ein Update.");
+                break;
+            case 'show:profile-':
+                alert("Spoiler Alert: Die neue Funktion wird heißer als dein Lieblingsmeme.");
+                break;
+            case 'trigger:login-for-cart':
+                alert('Bitte anmelden oder Registrieren.');
+                break;
+        }
+    });
 
     loadCart();
 });

@@ -515,7 +515,7 @@ body[background="5"] {
     text-decoration:underline;
 }
 
-[shopping-cart] > [form] > [button="site:shopping-cart"] {
+[shopping-cart] > [form] > [button="site:shopping-cart"]{
     align-self: center;
     text-align: center;
     padding: 16px 20px;
@@ -776,7 +776,8 @@ body[background="5"] {
     align-items: center;
 }
 
-[book-information] > [form] > [book-info] > [menu] > [button="addto:shopping-cart"] {
+[book-information] > [form] > [book-info] > [menu] > [button="addto:shopping-cart"],
+[book-information] > [form] > [book-info] > [menu] > [button="trigger:login-for-cart"]  {
     background-color: #477ef5;
 }
 
