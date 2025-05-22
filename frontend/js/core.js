@@ -59,52 +59,6 @@ $( document ).ready(() => {
             case 'show:profile-':
                 alert("Spoiler Alert: Die neue Funktion wird heißer als dein Lieblingsmeme.");
                 break;
-            case 'addto:library':
-                if (!sessionStorage.getItem('user')) return alert('Nicht angemeldet.');
-                const libraryUser = JSON.parse(sessionStorage.getItem('user'));
-                try {
-                    const res = fetch(api_url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'add_to_library',
-                            user_id: libraryUser.id,
-                            book_id: bookId
-                        })
-                    });
-                    const result = res.json();
-                    if (result.success) {
-                        alert("Zur Bibliothek hinzugefügt.");
-                    } else {
-                        alert("Fehler: " + result.message);
-                    }
-                } catch (err) {
-                    console.error("Fehler beim Hinzufügen zur Bibliothek:", err);
-                }
-                break;
-            case 'addto:wishlist':
-                if (!sessionStorage.getItem('user')) return alert('Nicht angemeldet.');
-                const wishlistUser = JSON.parse(sessionStorage.getItem('user'));
-                try {
-                    const res = fetch(api_url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'add_to_wishlist',
-                            user_id: wishlistUser.id,
-                            book_id: bookId
-                        })
-                    });
-                    const result = res.json();
-                    if (result.success) {
-                        alert("Zur Wunschliste hinzugefügt.");
-                    } else {
-                        alert("Fehler: " + result.message);
-                    }
-                } catch (err) {
-                    console.error("Fehler beim Hinzufügen zur Wunschliste:", err);
-                }
-                break;
         }
     });
 
@@ -348,9 +302,8 @@ $( document ).ready(() => {
         const bookId = $(this).attr('book-cover');
         const bookImage = String(bookId).padStart(3, '0');
         const user = JSON.parse(sessionStorage.getItem('user'));
-
         try {
-            const res = await fetch(api_url, {
+            const bookRes = await fetch(api_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -359,15 +312,34 @@ $( document ).ready(() => {
                     user_id: user.id
                 })
             });
-
-            if (!res.ok) throw new Error("Fehler beim Laden des Buchs");
-            const book = await res.json();
-
+            if (!bookRes.ok) throw new Error("Fehler beim Laden des Buchs");
+            const book = await bookRes.json();
+            const libRes = await fetch(api_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'library',
+                    user_id: user.id,
+                    book_id: bookId
+                })
+            });
+            const libCheck = await libRes.json();
+            const inLibrary = libCheck.success === true;
+            const wishRes = await fetch(api_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'wishlist',
+                    user_id: user.id,
+                    book_id: bookId
+                })
+            });
+            const wishCheck = await wishRes.json();
+            const inWishlist = wishCheck.success === true;
             const categoryName = book.category_name || "Unbekannt";
             const price = parseFloat(book.price).toFixed(2);
             const oldPrice = book.old_price ? `<span old>${parseFloat(book.old_price).toFixed(2)}€</span>` : "";
             const bookTitle = book.title.trim();
-
             let alreadyInCart = false;
             $('[shopping-cart] [element] [text]').each(function () {
                 const fullText = $(this).text().trim();
@@ -376,22 +348,15 @@ $( document ).ready(() => {
                     return false;
                 }
             });
-
-            const inLibrary = book.in_library === true;
-            const inWishlist = book.in_wishlist === true;
-
             const addToCartBtn = alreadyInCart
                 ? `<div button disabled class="disabled">✔️ Warenkorb</div>`
                 : `<div button="addto:shopping-cart" book-data="${book.book_id};${book.title};${categoryName};${price};1">+ Warenkorb</div>`;
-
             const libraryBtn = inLibrary
                 ? `<div button disabled class="disabled">✔️ Bibliothek</div>`
-                : `<div button="addto:library" book-data="${book.book_id};${user.id}">+ Bibliothek</div>`;
-
+                : `<div button="addto:library" book-data="${book.book_id}">+ Bibliothek</div>`;
             const wishlistBtn = inWishlist
                 ? `<div button disabled class="disabled">✔️ Wunschliste</div>`
-                : `<div button="addto:wishlist" book-data="${book.book_id};${user.id}">+ Wunschliste</div>`;
-
+                : `<div button="addto:wishlist" book-data="${book.book_id}">+ Wunschliste</div>`;
             const bookHtml = `
                 <div button="hide:book-information">
                     <i class="fa fa-times" aria-hidden="true"></i>
@@ -424,7 +389,6 @@ $( document ).ready(() => {
             `;
             $('[book-information] > [form]').html(bookHtml);
             $('[book-information]').css('display', 'flex');
-
             $('[button]').on("click", function () {
                 switch ($(this).attr('button')) {
                     case 'read:text':
@@ -439,7 +403,6 @@ $( document ).ready(() => {
                             if (preferredVoice) currentUtterance.voice = preferredVoice;
                             speechSynthesis.speak(currentUtterance);
                         }
-
                         if (speechSynthesis.getVoices().length > 0) {
                             speak(text);
                         } else {
@@ -450,11 +413,9 @@ $( document ).ready(() => {
                     case 'pause:text':
                         if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.pause();
                         break;
-
                     case 'resume:text':
                         if (speechSynthesis.paused) speechSynthesis.resume();
                         break;
-
                     case 'stop:text':
                         if (speechSynthesis.speaking) speechSynthesis.cancel();
                         break;
@@ -464,6 +425,7 @@ $( document ).ready(() => {
             console.error("Fehler beim Abrufen der Buchdetails:", err);
         }
     });
+
 
     $(document).on('click', '[button="hide:book-information"]', function () {
         $('[book-information]').hide();
@@ -561,6 +523,39 @@ $( document ).ready(() => {
         }
     });
 
+    $(document).on('click', '[button^="addto:library"], [button^="addto:wishlist"]', async function () {
+        const buttonType = $(this).attr('button');
+        const bookId = $(this).attr('book-data');
+        const storedUser = sessionStorage.getItem('user');
+        if (!storedUser || !bookId) return;
+
+        const user = JSON.parse(storedUser);
+        const actionType = buttonType === 'addto:library' ? 'add_to_library' : 'add_to_wishlist';
+
+        try {
+            const res = await fetch(api_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: actionType,
+                    user_id: user.id,
+                    book_id: bookId
+                })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                $(this).removeAttr('button').addClass('disabled').text(`✔️ ${buttonType.includes("library") ? 'Bibliothek' : 'Wunschliste'}`);
+            } else {
+                alert("Fehler: " + result.message);
+            }
+        } catch (err) {
+            console.error(`Fehler beim Hinzufügen zur ${buttonType.includes("library") ? 'Bibliothek' : 'Wunschliste'}:`, err);
+        }
+    });
+
     $(document).on('change', 'div[shopping-cart] input[type="number"]', async function () {
         const storedUser = sessionStorage.getItem('user');
         if (!storedUser) {
@@ -626,7 +621,7 @@ $( document ).ready(() => {
                 fetch(api_url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'books' })
+                    body: JSON.stringify({ action: 'books'})
                 }),
                 fetch(api_url, {
                     method: 'POST',
