@@ -650,7 +650,7 @@ $( document ).ready(() => {
                             von ${book.author || 'Unbekannt'}<br>
                             Jahr: ${book.publication_year || '–'}<br>
                             Kategorie: ${book.category_name || '–'}<br>
-                            <button class="remove-book" data-type="${listType}" data-id="${book.id}">🗑️ Entfernen</button>
+                            <div button="delete" data-type="${listType}" data-id="${book.id}">🗑️ Entfernen</div>
                             <hr>
                         </div>
                     `;
@@ -665,7 +665,7 @@ $( document ).ready(() => {
         }
     });
 
-    $(document).on('click', '.remove-book', async function () {
+    $(document).on('click', '[button="delete"]', async function () {
         const user = JSON.parse(sessionStorage.getItem('user'));
         if (!user?.id) return;
 
@@ -687,7 +687,6 @@ $( document ).ready(() => {
             const data = await res.json();
             if (!data.success) throw new Error("Konnte das Buch nicht entfernen");
 
-            // 🔄 Liste neu laden
             $(`[button="show:${listType}"]`).trigger('click');
 
         } catch (err) {
