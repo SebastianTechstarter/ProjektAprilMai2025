@@ -615,6 +615,47 @@ $( document ).ready(() => {
         });
     });
 
+    $(document).on('click', '[button="show:library"], [button="show:wishlist"]', async function () {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user?.id) return;
+        const action = $(this).attr('button') === 'show:library' ? 'get_library_books' : 'get_wishlist_books';
+        const title = action === 'get_library_books' ? '📚 Deine Bibliothek' : '💖 Deine Wunschliste';
+        try {
+            const res = await fetch(api_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: action,
+                    user_id: user.id
+                })
+            });
+            if (!res.ok) throw new Error("Fehler beim Abrufen der Daten");
+            const data = await res.json();
+            if (!data.success) throw new Error("Fehlerhafte Antwort von der API");
+            const books = data.books;
+            let html = `<div element><h2>${title}</h2></div>`;
+            if (books.length === 0) {
+                html += `<div element><p>Keine Bücher gefunden.</p></div>`;
+            } else {
+                books.forEach(book => {
+                    html += `
+                        <div element>
+                            <strong>${book.title}</strong><br>
+                            von ${book.author || 'Unbekannt'}<br>
+                            Jahr: ${book.publication_year || '–'}<br>
+                            Kategorie: ${book.category_name || '–'}
+                            <hr>
+                        </div>
+                    `;
+                });
+            }
+            $('div[profile] > div[content]').html(html);
+        } catch (err) {
+            console.error("Fehler:", err);
+            $('div[profile] > div[content]').html(`<div element><p>Ein Fehler ist aufgetreten: ${err.message}</p></div>`);
+        }
+    });
+
     (async () => {
         try {
             const [booksRes, categoriesRes, publishersRes] = await Promise.all([
